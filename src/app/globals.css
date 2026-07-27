@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
+  --color-ink: #1f2924;
+  --color-moss: #42614f;
+  --color-moss-dark: #2f4739;
+  --color-sage: #dfe8df;
+  --color-paper: #f7f5ef;
+  --color-cream: #eeeadf;
+  --color-clay: #b86a4b;
+}
+
+:root {
+  color-scheme: light;
+  --background: #f7f5ef;
+  --foreground: #1f2924;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--background);
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at 15% 0%, rgb(223 232 223 / 0.75), transparent 34rem),
+    var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: #c8d8cb;
+  color: #17211c;
+}

@@ -1,0 +1,37 @@
+{
+  "name": "personal-library",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "0.115.0",
+    "@mozilla/readability": "0.6.0",
+    "@supabase/ssr": "0.12.3",
+    "@supabase/supabase-js": "2.110.9",
+    "linkedom": "0.18.13",
+    "lucide-react": "1.27.0",
+    "next": "16.2.12",
+    "openai": "6.49.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "server-only": "0.0.1",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "26.1.2",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.2.12",
+    "tailwindcss": "4.3.3",
+    "typescript": "6.0.3"
+  },
+  "packageManager": "pnpm@11.9.0"
+}
