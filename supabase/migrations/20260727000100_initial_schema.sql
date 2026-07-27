@@ -471,7 +471,7 @@ as $$
     select
       chunks.id,
       row_number() over (
-        order by chunks.embedding <=> query_embedding
+        order by chunks.embedding operator(extensions.<=>) query_embedding
       ) as rank
     from public.source_chunks as chunks
     where chunks.user_id = (select auth.uid())
@@ -485,7 +485,7 @@ as $$
             and source_project.project_id = filter_project_id
         )
       )
-    order by chunks.embedding <=> query_embedding
+    order by chunks.embedding operator(extensions.<=>) query_embedding
     limit least(greatest(match_count * 3, 24), 100)
   ),
   fused as (
