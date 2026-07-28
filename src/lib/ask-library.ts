@@ -31,7 +31,7 @@ export async function answerFromEvidence(
   question: string,
   evidence: SearchResult[],
 ) {
-  const model = process.env.ANTHROPIC_MODEL || "claude-opus-4-8";
+  const model = process.env.ANTHROPIC_MODEL || "claude-opus-5";
   const evidenceText = evidence
     .map(
       (item) =>
