@@ -1,5 +1,5 @@
-// Print a localhost magic-link callback URL for local testing.
-//   node scripts/dev-login-link.mjs [port]
+// Print a magic-link callback URL for testing.
+//   node scripts/dev-login-link.mjs [port | https://base.url]
 // Uses admin generateLink + the /auth/callback?token_hash=... branch (Gmail
 // prefetch makes emailed PKCE links unreliable; this path is deterministic).
 import { readFileSync } from "node:fs";
@@ -7,7 +7,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createClient } from "@supabase/supabase-js";
 
-const port = process.argv[2] || "3200";
+const target = process.argv[2] || "3200";
+const base = target.startsWith("http") ? target.replace(/\/$/, "") : `http://localhost:${target}`;
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 for (const line of readFileSync(path.join(repoRoot, ".env.local"), "utf8").split(/\r?\n/)) {
   const m = line.match(/^([A-Z_0-9]+)=(.*)$/);
@@ -20,4 +21,4 @@ const { data, error } = await supabase.auth.admin.generateLink({
   email: "rossgarlick@gmail.com",
 });
 if (error) throw error;
-console.log(`http://localhost:${port}/auth/callback?token_hash=${data.properties.hashed_token}&type=magiclink&next=/library`);
+console.log(`${base}/auth/callback?token_hash=${data.properties.hashed_token}&type=magiclink&next=/library`);
