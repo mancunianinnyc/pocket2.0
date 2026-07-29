@@ -36,7 +36,7 @@ export function AskExperience() {
   return (
     <div>
       <form onSubmit={submit}>
-        <div className="rounded-[1.4rem] border border-ink/10 bg-white p-2 shadow-sm">
+        <div className="rounded-[1.4rem] border-[1.5px] border-ink/14 bg-white p-2 shadow-sm transition focus-within:border-moss focus-within:shadow-[0_0_0_3px_rgba(217,244,92,0.6)]">
           <textarea
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
@@ -50,7 +50,7 @@ export function AskExperience() {
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex h-11 items-center gap-2 rounded-xl bg-moss px-4 text-sm font-semibold text-white disabled:opacity-60"
+              className="inline-flex h-11 items-center gap-2 rounded-[14px] bg-ink px-4 text-sm font-semibold text-lime transition hover:bg-moss disabled:opacity-60"
             >
               {loading ? <LoaderCircle className="animate-spin" size={17} /> : <Send size={17} />}
               Ask my library
@@ -63,8 +63,10 @@ export function AskExperience() {
 
       {answer ? (
         <section className="mt-7 rounded-[1.5rem] border border-ink/8 bg-white/75 p-5 sm:p-7">
-          <div className="flex items-center gap-2 text-sm font-semibold text-moss">
-            <Sparkles size={17} />
+          <div className="flex items-center gap-2 text-sm font-bold text-moss">
+            <span className="flex size-7 items-center justify-center rounded-lg bg-lime text-ink">
+              <Sparkles size={15} />
+            </span>
             Answer from your library
           </div>
           {answer.insufficient_evidence ? (
@@ -86,7 +88,7 @@ export function AskExperience() {
                   <Link
                     key={`${citation.source_id}-${citation.chunk_index}-${index}`}
                     href={`/library/${citation.source_id}`}
-                    className="group rounded-xl bg-cream/70 p-4"
+                    className="group rounded-[14px] border-l-[3px] border-lime bg-cream/70 p-4"
                   >
                     <div className="flex justify-between gap-4">
                       <p className="text-xs font-semibold text-moss">

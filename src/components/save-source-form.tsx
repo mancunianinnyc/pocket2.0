@@ -67,7 +67,7 @@ export function SaveSourceForm({
 
   return (
     <form onSubmit={submit}>
-      <div className="flex flex-col gap-3 rounded-[1.4rem] border border-ink/10 bg-white p-2 shadow-[0_18px_50px_rgba(50,65,56,0.09)] sm:flex-row">
+      <div className="flex flex-col gap-3 rounded-[1.4rem] border-[1.5px] border-ink/14 bg-white p-2 shadow-[0_20px_55px_rgba(14,32,24,0.12)] transition focus-within:border-moss focus-within:shadow-[0_0_0_3px_rgba(217,244,92,0.6),0_20px_55px_rgba(14,32,24,0.12)] sm:flex-row">
         <label className="flex min-w-0 flex-1 items-center gap-3 px-3">
           <Link2 className="shrink-0 text-moss" size={19} />
           <span className="sr-only">URL to save</span>
@@ -83,7 +83,7 @@ export function SaveSourceForm({
         <button
           type="submit"
           disabled={saving}
-          className="flex h-12 items-center justify-center gap-2 rounded-xl bg-moss px-5 font-semibold text-white transition hover:bg-moss-dark disabled:cursor-wait disabled:opacity-70"
+          className="flex h-12 items-center justify-center gap-2 rounded-[14px] bg-ink px-5 font-semibold text-lime transition hover:bg-moss active:scale-[0.98] disabled:cursor-wait disabled:opacity-75"
         >
           {saving ? (
             <>

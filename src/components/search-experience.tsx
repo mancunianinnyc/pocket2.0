@@ -32,7 +32,7 @@ export function SearchExperience() {
 
   return (
     <div>
-      <form onSubmit={submit} className="flex rounded-2xl border border-ink/10 bg-white p-2 shadow-sm">
+      <form onSubmit={submit} className="flex rounded-2xl border-[1.5px] border-ink/14 bg-white p-2 shadow-sm transition focus-within:border-moss focus-within:shadow-[0_0_0_3px_rgba(217,244,92,0.6)]">
         <label className="flex min-w-0 flex-1 items-center gap-3 px-3">
           <Search className="shrink-0 text-moss" size={19} />
           <span className="sr-only">Search your library</span>
@@ -48,7 +48,7 @@ export function SearchExperience() {
         <button
           type="submit"
           disabled={loading}
-          className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-moss text-white disabled:opacity-60 sm:w-auto sm:px-5"
+          className="flex size-12 shrink-0 items-center justify-center rounded-[14px] bg-ink text-lime transition hover:bg-moss disabled:opacity-60 sm:w-auto sm:px-5"
         >
           {loading ? <LoaderCircle className="animate-spin" size={18} /> : <span className="hidden font-semibold sm:block">Search</span>}
           <Search className="sm:hidden" size={18} />

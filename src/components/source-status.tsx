@@ -4,22 +4,22 @@ import type { SourceStatus } from "@/types/library";
 const statusConfig = {
   queued: {
     label: "Queued",
-    className: "bg-cream text-ink/60",
+    className: "bg-amber-brand/20 text-amber-900",
     icon: Clock3,
   },
   processing: {
     label: "Reading",
-    className: "bg-blue-50 text-blue-700",
+    className: "bg-ink/8 text-moss",
     icon: LoaderCircle,
   },
   ready: {
     label: "Ready",
-    className: "bg-sage text-moss-dark",
+    className: "bg-lime text-ink",
     icon: CheckCircle2,
   },
   failed: {
     label: "Needs attention",
-    className: "bg-red-50 text-red-700",
+    className: "bg-clay/15 text-clay",
     icon: AlertCircle,
   },
 } satisfies Record<

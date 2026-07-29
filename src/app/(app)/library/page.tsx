@@ -29,7 +29,7 @@ export default async function LibraryPage() {
     <main className="mx-auto max-w-6xl px-4 pb-28 pt-8 sm:px-6 sm:pt-12 md:pb-16">
       <div className="mx-auto max-w-3xl">
         <p className="text-sm font-semibold text-clay">Your quiet corner</p>
-        <h1 className="mt-2 max-w-2xl text-4xl font-semibold tracking-[-0.05em] text-ink sm:text-5xl">
+        <h1 className="mt-2 max-w-2xl text-4xl font-bold tracking-[-0.05em] text-ink sm:text-5xl">
           Save now. Understand later.
         </h1>
         <p className="mt-4 max-w-xl text-base leading-7 text-ink/58">
@@ -59,7 +59,7 @@ export default async function LibraryPage() {
             Could not load your library: {error.message}
           </div>
         ) : sources.length ? (
-          <div className="grid gap-3">
+          <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-4">
             {sources.map((source) => (
               <SourceCard key={source.id} source={source} />
             ))}

@@ -37,6 +37,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# personal import manifests (names, email quotes, saved tweets)
+/scripts/data/
+
 # local pnpm cache used by sandboxed development
 .pnpm-cache/
 .pnpm-store/

@@ -26,10 +26,10 @@ export default async function AppLayout({
       <header className="sticky top-0 z-40 border-b border-ink/8 bg-paper/88 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <Link href="/library" className="flex items-center gap-2.5">
-            <span className="flex size-9 items-center justify-center rounded-xl bg-moss text-white">
+            <span className="flex size-9 items-center justify-center rounded-xl bg-lime text-ink">
               <BookOpen size={18} strokeWidth={1.8} />
             </span>
-            <span className="font-semibold tracking-[-0.02em]">Personal Library</span>
+            <span className="font-bold tracking-[-0.02em]">Personal Library</span>
           </Link>
 
           <PrimaryNavigation />

@@ -27,11 +27,14 @@ export function PrimaryNavigation({
               key={href}
               href={href}
               className={`flex min-w-20 flex-col items-center gap-1 rounded-xl py-1.5 text-xs ${
-                active ? "font-semibold text-moss" : "text-ink/40"
+                active ? "font-bold text-moss" : "text-ink/40"
               }`}
             >
               <Icon size={20} />
               {label}
+              <span
+                className={`h-0.5 w-5 rounded-full ${active ? "bg-lime" : "bg-transparent"}`}
+              />
             </Link>
           );
         })}
@@ -49,7 +52,7 @@ export function PrimaryNavigation({
             href={href}
             className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm ${
               active
-                ? "bg-sage font-semibold text-moss-dark"
+                ? "bg-lime font-bold text-ink"
                 : "text-ink/52 hover:text-ink"
             }`}
           >
