@@ -50,6 +50,14 @@ function savedDate(source: LibrarySource) {
   }).format(new Date(source.saved_at));
 }
 
+/** "site.com · Jul 12 · 8 min" — the card's quiet top line. */
+function metaLine(source: LibrarySource, lead: string) {
+  const minutes = firstMetadata(source)?.reading_time_minutes;
+  return [lead, savedDate(source), minutes ? `${minutes} min` : null]
+    .filter(Boolean)
+    .join(" · ");
+}
+
 /** Tweet imports store "@handle: first line…" titles and "Tweet by Name (@handle), date:\n\ntext" bodies. */
 function tweetParts(source: LibrarySource) {
   const handle = source.title?.match(/^@[A-Za-z0-9_]+/)?.[0] ?? "@x";
@@ -82,14 +90,14 @@ function TweetCard({ source }: { source: LibrarySource }) {
           𝕏
         </span>
         <span className="min-w-0 flex-1">
-          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-ink/48">
-            <span className="size-1.5 shrink-0 rounded-full bg-lime" />
-            <span className="truncate">{handle} · {savedDate(source)}</span>
+          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-ink/62">
+            <span className="size-1.5 shrink-0 rounded-full bg-moss" />
+            <span className="truncate">{metaLine(source, handle)}</span>
           </span>
-          <span className="mt-0.5 line-clamp-2 text-sm font-semibold leading-snug tracking-[-0.015em] text-ink">
+          <span className="mt-1 line-clamp-2 text-[15px] font-semibold leading-snug tracking-[-0.015em] text-ink">
             {text}
           </span>
-          <span className="mt-0.5 line-clamp-2 text-xs leading-5 text-ink/55">
+          <span className="mt-1 line-clamp-2 text-xs leading-5 text-ink/70">
             {gist(metadata?.summary) || name}
           </span>
         </span>
@@ -108,8 +116,8 @@ function TweetCard({ source }: { source: LibrarySource }) {
             <span className="block truncate text-[13px] font-semibold tracking-[-0.01em]">
               {name}
             </span>
-            <span className="block truncate text-[11.5px] text-ink/45">
-              {handle} · saved {savedDate(source)}
+            <span className="block truncate text-[11.5px] text-ink/62">
+              {metaLine(source, handle)}
             </span>
           </span>
           <span className="text-sm font-bold text-ink/30">𝕏</span>
@@ -122,7 +130,7 @@ function TweetCard({ source }: { source: LibrarySource }) {
             {topics.map((topic) => (
               <span
                 key={topic}
-                className="rounded-full bg-cream px-2.5 py-1 text-[10.5px] font-semibold text-ink/65"
+                className="rounded-full bg-cream px-2.5 py-1 text-[10.5px] font-semibold text-ink/75"
               >
                 {topic}
               </span>
@@ -160,22 +168,22 @@ function ArticleCard({ source }: { source: LibrarySource }) {
           {mark}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-ink/48">
+          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-ink/62">
             <span
               className={`size-1.5 shrink-0 rounded-full ${
                 source.status === "ready"
-                  ? "bg-lime"
+                  ? "bg-moss"
                   : source.status === "failed"
                     ? "bg-clay"
                     : "bg-amber-brand"
               }`}
             />
-            <span className="truncate">{sourceDomain} · {savedDate(source)}</span>
+            <span className="truncate">{metaLine(source, sourceDomain)}</span>
           </span>
-          <span className="mt-0.5 line-clamp-2 text-sm font-semibold leading-snug tracking-[-0.015em] text-ink group-hover:text-moss">
+          <span className="mt-1 line-clamp-2 text-[15px] font-semibold leading-snug tracking-[-0.015em] text-ink group-hover:text-moss">
             {source.title || "Untitled source"}
           </span>
-          <span className="mt-0.5 block text-xs leading-5 text-ink/55">
+          <span className="mt-1 block text-xs leading-5 text-ink/70">
             {gist(summary)}
           </span>
         </span>
@@ -195,13 +203,13 @@ function ArticleCard({ source }: { source: LibrarySource }) {
           </span>
         </div>
         <div className="flex flex-1 flex-col gap-1.5 px-4 pb-4 pt-3.5">
-          <p className="text-[11.5px] font-semibold text-ink/48">
-            {sourceDomain} · {savedDate(source)}
+          <p className="text-[11.5px] font-semibold text-ink/62">
+            {metaLine(source, sourceDomain)}
           </p>
-          <h2 className="line-clamp-2 text-[15.5px] font-semibold leading-snug tracking-[-0.02em] text-ink group-hover:text-moss">
+          <h2 className="line-clamp-2 text-[16px] font-semibold leading-snug tracking-[-0.02em] text-ink group-hover:text-moss">
             {source.title || "Untitled source"}
           </h2>
-          <p className="line-clamp-2 text-[13px] leading-relaxed text-ink/58">
+          <p className="line-clamp-2 text-[13px] leading-relaxed text-ink/70">
             {gist(summary)}
           </p>
           {topics.length ? (
@@ -209,7 +217,7 @@ function ArticleCard({ source }: { source: LibrarySource }) {
               {topics.map((topic) => (
                 <span
                   key={topic}
-                  className="rounded-full bg-cream px-2.5 py-1 text-[10.5px] font-semibold text-ink/65"
+                  className="rounded-full bg-cream px-2.5 py-1 text-[10.5px] font-semibold text-ink/75"
                 >
                   {topic}
                 </span>

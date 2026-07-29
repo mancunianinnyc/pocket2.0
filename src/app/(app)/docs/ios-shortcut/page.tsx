@@ -18,7 +18,7 @@ export default function IosShortcutPage() {
     <main className="mx-auto max-w-3xl px-4 pb-28 pt-8 sm:px-6 md:pb-16">
       <Link
         href="/settings"
-        className="inline-flex items-center gap-2 text-sm font-semibold text-ink/55 hover:text-moss"
+        className="inline-flex items-center gap-2 text-sm font-semibold text-ink/70 hover:text-moss"
       >
         <ArrowLeft size={17} />
         Settings
@@ -27,7 +27,7 @@ export default function IosShortcutPage() {
       <h1 className="mt-2 text-4xl font-semibold tracking-[-0.045em]">
         Add Personal Library to the Share Sheet.
       </h1>
-      <p className="mt-4 max-w-xl leading-7 text-ink/55">
+      <p className="mt-4 max-w-xl leading-7 text-ink/70">
         Do this once. Afterward, saving any Safari link is a single Share Sheet
         action.
       </p>

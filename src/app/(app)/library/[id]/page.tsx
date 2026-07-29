@@ -2,6 +2,7 @@ import {
   ArrowLeft,
   ArrowUpRight,
   CalendarDays,
+  ChevronDown,
   Clock3,
   Quote,
   UserRound,
@@ -49,7 +50,7 @@ export default async function ReaderPage({
     <main className="mx-auto max-w-6xl px-4 pb-28 pt-6 sm:px-6 md:pb-16">
       <Link
         href="/library"
-        className="inline-flex items-center gap-2 rounded-lg py-2 text-sm font-semibold text-ink/55 hover:text-moss"
+        className="-ml-2 inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm font-semibold text-ink/70 hover:text-moss"
       >
         <ArrowLeft size={17} />
         Library
@@ -60,7 +61,7 @@ export default async function ReaderPage({
           <div className="flex flex-wrap items-center gap-3">
             <SourceStatusBadge status={source.status} />
             {metadata?.content_type ? (
-              <span className="text-xs font-medium text-ink/45">
+              <span className="text-xs font-medium text-ink/62">
                 {metadata.content_type}
               </span>
             ) : null}
@@ -70,7 +71,7 @@ export default async function ReaderPage({
             {source.title || "Untitled source"}
           </h1>
 
-          <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm text-ink/48">
+          <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm text-ink/62">
             {source.author ? (
               <span className="inline-flex items-center gap-1.5">
                 <UserRound size={15} />
@@ -99,7 +100,7 @@ export default async function ReaderPage({
                 href={source.canonical_url}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-ink/10 bg-white/70 px-3 text-[13px] font-semibold text-ink/70 hover:border-moss/30 hover:text-moss"
+                className="inline-flex h-11 items-center gap-1.5 rounded-xl border border-ink/10 bg-white/70 px-4 text-[13px] font-semibold text-ink/70 hover:border-moss/30 hover:text-moss"
               >
                 See original
                 <ArrowUpRight size={15} />
@@ -109,6 +110,24 @@ export default async function ReaderPage({
                 title={source.title || "Saved link"}
               />
             </div>
+          ) : null}
+
+          {/* Mobile keeps the summary within thumb's reach — the aside lands
+              below the whole article on small screens. Desktop uses the aside. */}
+          {metadata?.summary ? (
+            <details className="group mt-7 overflow-hidden rounded-2xl border border-moss/15 bg-sage/45 lg:hidden">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-moss [&::-webkit-details-marker]:hidden">
+                In brief
+                <ChevronDown
+                  size={17}
+                  aria-hidden
+                  className="details-chevron shrink-0"
+                />
+              </summary>
+              <p className="px-4 pb-4 text-sm leading-6 text-ink/80">
+                {metadata.summary}
+              </p>
+            </details>
           ) : null}
 
           {source.status === "failed" ? (
@@ -127,7 +146,7 @@ export default async function ReaderPage({
               ))}
             </div>
           ) : source.status !== "failed" ? (
-            <p className="mt-9 text-ink/50">
+            <p className="mt-9 text-ink/70">
               This item is still being prepared. Refresh in a moment.
             </p>
           ) : null}
@@ -135,11 +154,11 @@ export default async function ReaderPage({
 
         <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
           {metadata?.summary ? (
-            <section className="rounded-2xl border border-moss/12 bg-sage/55 p-5">
+            <section className="hidden rounded-2xl border border-moss/12 bg-sage/55 p-5 lg:block">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
                 In brief
               </p>
-              <p className="mt-2 text-sm leading-6 text-ink/72">
+              <p className="mt-2 text-sm leading-6 text-ink/80">
                 {metadata.summary}
               </p>
             </section>
@@ -155,7 +174,7 @@ export default async function ReaderPage({
                 {metadata.key_claims.map((claim) => (
                   <li
                     key={claim}
-                    className="border-l-2 border-cream pl-3 text-sm leading-6 text-ink/62"
+                    className="border-l-2 border-cream pl-3 text-sm leading-6 text-ink/75"
                   >
                     {claim}
                   </li>
@@ -171,7 +190,7 @@ export default async function ReaderPage({
                 {metadata.topics.map((topic) => (
                   <span
                     key={topic}
-                    className="rounded-full bg-cream px-2.5 py-1 text-xs text-ink/60"
+                    className="rounded-full bg-cream px-2.5 py-1 text-xs text-ink/75"
                   >
                     {topic}
                   </span>

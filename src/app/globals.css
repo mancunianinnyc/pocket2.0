@@ -52,6 +52,15 @@ a {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Collapsible "In brief" on the reader page: flip the chevron when open. */
+.details-chevron {
+  transition: transform 150ms ease;
+}
+
+details[open] > summary .details-chevron {
+  transform: rotate(180deg);
+}
+
 ::selection {
   background: #d9f45c;
   color: #0e2018;

@@ -11,7 +11,7 @@ export default function SearchPage() {
       <h1 className="mt-2 text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
         Find the passage, not just the title.
       </h1>
-      <p className="mt-4 max-w-xl leading-7 text-ink/55">
+      <p className="mt-4 max-w-xl leading-7 text-ink/70">
         Search blends exact wording with conceptual similarity across every
         readable item.
       </p>

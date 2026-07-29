@@ -26,8 +26,8 @@ export function PrimaryNavigation({
             <Link
               key={href}
               href={href}
-              className={`flex min-w-20 flex-col items-center gap-1 rounded-xl py-1.5 text-xs ${
-                active ? "font-bold text-moss" : "text-ink/40"
+              className={`flex min-h-11 min-w-20 flex-col items-center gap-1 rounded-xl py-1.5 text-xs ${
+                active ? "font-bold text-moss" : "text-ink/62"
               }`}
             >
               <Icon size={20} />
@@ -53,7 +53,7 @@ export function PrimaryNavigation({
             className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm ${
               active
                 ? "bg-lime font-bold text-ink"
-                : "text-ink/52 hover:text-ink"
+                : "text-ink/70 hover:text-ink"
             }`}
           >
             <Icon size={16} />

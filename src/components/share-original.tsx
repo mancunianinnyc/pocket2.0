@@ -30,7 +30,7 @@ export function ShareOriginalButton({
     <button
       type="button"
       onClick={share}
-      className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-ink/10 bg-white/70 px-3 text-[13px] font-semibold text-ink/70 hover:border-moss/30 hover:text-moss"
+      className="inline-flex h-11 items-center gap-1.5 rounded-xl border border-ink/10 bg-white/70 px-4 text-[13px] font-semibold text-ink/70 hover:border-moss/30 hover:text-moss"
     >
       {copied ? <Check size={15} className="text-moss" /> : <Share2 size={15} />}
       {copied ? "Link copied" : "Share"}

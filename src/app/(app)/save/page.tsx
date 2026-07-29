@@ -18,7 +18,7 @@ export default async function SavePage({
         <h1 className="mt-2 text-4xl font-semibold tracking-[-0.045em]">
           Adding this to your library.
         </h1>
-        <p className="mt-3 text-ink/55">
+        <p className="mt-3 text-ink/70">
           You can close this screen once the item opens.
         </p>
         <div className="mt-7">

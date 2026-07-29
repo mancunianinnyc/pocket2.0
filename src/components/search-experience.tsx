@@ -42,7 +42,7 @@ export function SearchExperience() {
             required
             minLength={2}
             placeholder="An exact phrase or half-remembered idea…"
-            className="h-12 min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-ink/35"
+            className="h-12 min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-ink/55"
           />
         </label>
         <button
@@ -67,14 +67,14 @@ export function SearchExperience() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold text-ink">{result.title || "Untitled source"}</p>
-                <p className="mt-2 line-clamp-3 text-sm leading-6 text-ink/58">{result.chunk_text}</p>
+                <p className="mt-2 line-clamp-3 text-sm leading-6 text-ink/70">{result.chunk_text}</p>
               </div>
               <ArrowUpRight className="shrink-0 text-ink/25 group-hover:text-moss" size={18} />
             </div>
           </Link>
         ))}
         {searched && !loading && results.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-ink/15 p-8 text-center text-sm text-ink/48">
+          <div className="rounded-2xl border border-dashed border-ink/15 p-8 text-center text-sm text-ink/70">
             No matching passages yet.
           </div>
         ) : null}

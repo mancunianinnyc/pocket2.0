@@ -58,7 +58,7 @@ export function SourceActions({
             type="button"
             onClick={retry}
             disabled={Boolean(busy)}
-            className="inline-flex h-10 items-center gap-2 rounded-xl bg-moss px-4 text-sm font-semibold text-white disabled:opacity-60"
+            className="inline-flex h-11 items-center gap-2 rounded-xl bg-moss px-4 text-sm font-semibold text-white disabled:opacity-60"
           >
             {busy === "retry" ? (
               <LoaderCircle className="animate-spin" size={16} />

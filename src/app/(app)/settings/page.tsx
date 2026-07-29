@@ -28,7 +28,7 @@ export default async function SettingsPage() {
       <h1 className="mt-2 text-4xl font-semibold tracking-[-0.045em]">
         Capture from anywhere.
       </h1>
-      <p className="mt-3 max-w-xl leading-7 text-ink/55">
+      <p className="mt-3 max-w-xl leading-7 text-ink/70">
         The quickest capture method depends on the device. Each one lands in the
         same private library.
       </p>
@@ -41,7 +41,7 @@ export default async function SettingsPage() {
             </span>
             <div>
               <h2 className="font-semibold">Capture API tokens</h2>
-              <p className="text-sm text-ink/50">For iOS Shortcuts and personal automations.</p>
+              <p className="text-sm text-ink/70">For iOS Shortcuts and personal automations.</p>
             </div>
           </div>
           <div className="mt-5">
@@ -56,7 +56,7 @@ export default async function SettingsPage() {
             </span>
             <div>
               <h2 className="font-semibold">iPhone Shortcut</h2>
-              <p className="text-sm text-ink/50">A two-minute Share Sheet setup.</p>
+              <p className="text-sm text-ink/70">A two-minute Share Sheet setup.</p>
             </div>
           </div>
           <a
@@ -75,7 +75,7 @@ export default async function SettingsPage() {
             </span>
             <div>
               <h2 className="font-semibold">Desktop bookmarklet</h2>
-              <p className="text-sm text-ink/50">Drag this link to your bookmarks bar.</p>
+              <p className="text-sm text-ink/70">Drag this link to your bookmarks bar.</p>
             </div>
           </div>
           <a

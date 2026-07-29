@@ -124,7 +124,7 @@ export function CaptureTokenManager({
             <div key={token.id} className="flex items-center justify-between gap-4 py-3">
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold">{token.label}</p>
-                <p className="mt-0.5 text-xs text-ink/45">
+                <p className="mt-0.5 text-xs text-ink/70">
                   {token.revoked_at
                     ? "Revoked"
                     : token.last_used_at
@@ -136,7 +136,7 @@ export function CaptureTokenManager({
                 <button
                   type="button"
                   onClick={() => revokeToken(token.id)}
-                  className="flex size-9 shrink-0 items-center justify-center rounded-lg text-ink/35 hover:bg-red-50 hover:text-red-700"
+                  className="flex size-11 shrink-0 items-center justify-center rounded-lg text-ink/62 hover:bg-red-50 hover:text-red-700"
                   aria-label={`Revoke ${token.label}`}
                 >
                   <X size={17} />
@@ -145,7 +145,7 @@ export function CaptureTokenManager({
             </div>
           ))
         ) : (
-          <p className="py-5 text-sm text-ink/45">No capture tokens yet.</p>
+          <p className="py-5 text-sm text-ink/70">No capture tokens yet.</p>
         )}
       </div>
     </div>

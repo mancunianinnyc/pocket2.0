@@ -38,17 +38,18 @@ export default async function AppLayout({
             <Link
               href="/settings"
               aria-label="Settings"
-              className="flex size-10 items-center justify-center rounded-xl text-ink/50 hover:bg-cream hover:text-ink"
+              className="flex size-11 items-center justify-center rounded-xl text-ink/62 hover:bg-cream hover:text-ink"
             >
-              <Settings size={18} />
+              <Settings size={19} />
             </Link>
             <form action={signOut}>
               <button
                 type="submit"
+                aria-label={`Sign out ${email}`}
                 title={`Sign out ${email}`}
-                className="flex size-10 items-center justify-center rounded-xl text-ink/50 hover:bg-cream hover:text-ink sm:size-auto sm:max-w-32 sm:px-3 sm:py-2 sm:text-sm"
+                className="flex size-11 items-center justify-center rounded-xl text-ink/62 hover:bg-cream hover:text-ink sm:size-auto sm:h-11 sm:max-w-32 sm:px-3 sm:text-sm"
               >
-                <LogOut className="sm:hidden" size={18} />
+                <LogOut className="sm:hidden" size={19} />
                 <span className="hidden truncate sm:block">{email}</span>
               </button>
             </form>

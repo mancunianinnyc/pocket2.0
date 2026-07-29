@@ -77,7 +77,7 @@ export function SaveSourceForm({
             value={url}
             onChange={(event) => setUrl(event.target.value)}
             placeholder="Paste a link worth keeping…"
-            className="h-12 min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-ink/38"
+            className="h-12 min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-ink/55"
           />
         </label>
         <button

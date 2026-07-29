@@ -44,7 +44,7 @@ export function AskExperience() {
             minLength={3}
             rows={3}
             placeholder="What did I save about…"
-            className="w-full resize-none bg-transparent px-3 py-2 text-[17px] leading-7 outline-none placeholder:text-ink/35"
+            className="w-full resize-none bg-transparent px-3 py-2 text-[17px] leading-7 outline-none placeholder:text-ink/55"
           />
           <div className="flex justify-end border-t border-ink/7 pt-2">
             <button
@@ -80,7 +80,7 @@ export function AskExperience() {
 
           {answer.citations.length ? (
             <div className="mt-7 border-t border-ink/8 pt-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink/40">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink/62">
                 Evidence
               </p>
               <div className="mt-3 grid gap-2">

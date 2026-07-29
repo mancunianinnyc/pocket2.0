@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <meta name="supported-color-schemes" content="light" />
+    <title>Sign in to Personal Library</title>
+    <!--[if mso]>
+      <style>
+        * { font-family: Arial, sans-serif !important; }
+      </style>
+    <![endif]-->
+  </head>
+  <body
+    style="margin:0; padding:0; width:100%; background-color:#f5f0e1; -webkit-text-size-adjust:100%;"
+  >
+    <!-- Preheader: shown in the inbox preview, hidden in the body. -->
+    <div
+      style="display:none; max-height:0; overflow:hidden; opacity:0; mso-hide:all;"
+    >
+      Your one-time sign-in link for Personal Library. It expires in 1 hour.
+    </div>
+
+    <table
+      role="presentation"
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      border="0"
+      style="background-color:#f5f0e1;"
+    >
+      <tr>
+        <td align="center" style="padding:32px 16px 48px 16px;">
+          <table
+            role="presentation"
+            width="100%"
+            cellpadding="0"
+            cellspacing="0"
+            border="0"
+            style="max-width:520px; width:100%;"
+          >
+            <!-- Brand -->
+            <tr>
+              <td align="left" style="padding:0 4px 20px 4px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td
+                      style="background-color:#d9f45c; border-radius:12px; padding:8px 14px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; font-size:14px; font-weight:700; letter-spacing:-0.02em; color:#0e2018;"
+                    >
+                      Personal Library
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Card -->
+            <tr>
+              <td
+                style="background-color:#ffffff; border:1px solid #e4ded0; border-radius:24px; padding:36px 32px 32px 32px;"
+              >
+                <p
+                  style="margin:0 0 10px 0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; font-size:14px; font-weight:600; color:#e8542f;"
+                >
+                  Welcome back
+                </p>
+
+                <h1
+                  style="margin:0 0 14px 0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; font-size:30px; line-height:1.15; font-weight:700; letter-spacing:-0.035em; color:#0e2018;"
+                >
+                  Find what you saved.
+                </h1>
+
+                <p
+                  style="margin:0 0 28px 0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; font-size:16px; line-height:1.6; color:#3f4d45;"
+                >
+                  Tap the button below and you're in — no password to remember.
+                  This link signs in
+                  <span style="color:#0e2018; font-weight:600;">{{ .Email }}</span>
+                  and works once.
+                </p>
+
+                <!-- Button -->
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                  <tr>
+                    <td align="center">
+                      <!--[if mso]>
+                        <v:roundrect
+                          xmlns:v="urn:schemas-microsoft-com:vml"
+                          xmlns:w="urn:schemas-microsoft-com:office:word"
+                          href="{{ .ConfirmationURL }}"
+                          style="height:56px; v-text-anchor:middle; width:440px;"
+                          arcsize="25%"
+                          stroke="f"
+                          fillcolor="#0e2018"
+                        >
+                          <w:anchorlock/>
+                          <center style="color:#d9f45c; font-family:Arial,sans-serif; font-size:17px; font-weight:bold;">
+                            Sign In
+                          </center>
+                        </v:roundrect>
+                      <![endif]-->
+                      <!--[if !mso]><!-- -->
+                      <a
+                        href="{{ .ConfirmationURL }}"
+                        style="display:block; width:100%; background-color:#0e2018; color:#d9f45c; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; font-size:17px; font-weight:700; letter-spacing:-0.01em; text-align:center; text-decoration:none; padding:19px 24px; border-radius:14px; mso-hide:all;"
+                      >
+                        Sign In &nbsp;&rarr;
+                      </a>
+                      <!--<![endif]-->
+                    </td>
+                  </tr>
+                </table>
+
+                <p
+                  style="margin:22px 0 0 0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; font-size:13px; line-height:1.6; color:#5c6a61;"
+                >
+                  The link expires in about an hour. If the button doesn't work,
+                  copy this address into your browser:
+                </p>
+                <p style="margin:8px 0 0 0;">
+                  <a
+                    href="{{ .ConfirmationURL }}"
+                    style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; font-size:12px; line-height:1.5; color:#14573f; word-break:break-all;"
+                    >{{ .ConfirmationURL }}</a
+                  >
+                </p>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td style="padding:22px 8px 0 8px;">
+                <p
+                  style="margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; font-size:12px; line-height:1.6; color:#6b7972;"
+                >
+                  You received this because someone asked for a sign-in link to
+                  Personal Library. If that wasn't you, ignore this email — no
+                  one can sign in without opening it.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

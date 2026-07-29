@@ -11,7 +11,7 @@ export default function AskPage() {
       <h1 className="mt-2 text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
         Ask what your reading already knows.
       </h1>
-      <p className="mt-4 max-w-xl leading-7 text-ink/55">
+      <p className="mt-4 max-w-xl leading-7 text-ink/70">
         Answers stay inside your saved evidence and link every material claim
         back to an exact passage.
       </p>

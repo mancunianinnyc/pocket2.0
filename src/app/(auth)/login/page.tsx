@@ -21,7 +21,7 @@ export default async function LoginPage({
           </span>
           <div>
             <p className="text-sm font-semibold text-moss">Personal Library</p>
-            <p className="text-xs text-ink/55">Keep the useful part.</p>
+            <p className="text-xs text-ink/70">Keep the useful part.</p>
           </div>
         </div>
 
@@ -49,7 +49,7 @@ export default async function LoginPage({
               <h1 className="mt-2 text-4xl font-semibold tracking-[-0.045em] text-ink">
                 Find what you saved.
               </h1>
-              <p className="mt-4 leading-7 text-ink/60">
+              <p className="mt-4 leading-7 text-ink/70">
                 Sign in with a magic link. No password to remember.
               </p>
 
