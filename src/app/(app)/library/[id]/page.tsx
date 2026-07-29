@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ShareOriginalButton } from "@/components/share-original";
 import { SourceActions } from "@/components/source-actions";
 import { SourceStatusBadge } from "@/components/source-status";
 import { createClient } from "@/lib/supabase/server";
@@ -92,12 +93,21 @@ export default async function ReaderPage({
             ) : null}
           </div>
 
-          {metadata?.summary ? (
-            <div className="mt-8 rounded-2xl border border-moss/12 bg-sage/55 p-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
-                In brief
-              </p>
-              <p className="mt-2 leading-7 text-ink/75">{metadata.summary}</p>
+          {source.canonical_url ? (
+            <div className="mt-6 flex flex-wrap items-center gap-2.5">
+              <a
+                href={source.canonical_url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-ink/10 bg-white/70 px-3 text-[13px] font-semibold text-ink/70 hover:border-moss/30 hover:text-moss"
+              >
+                See original
+                <ArrowUpRight size={15} />
+              </a>
+              <ShareOriginalButton
+                url={source.canonical_url}
+                title={source.title || "Saved link"}
+              />
             </div>
           ) : null}
 
@@ -124,16 +134,15 @@ export default async function ReaderPage({
         </article>
 
         <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
-          {source.canonical_url ? (
-            <a
-              href={source.canonical_url}
-              target="_blank"
-              rel="noreferrer"
-              className="flex h-11 items-center justify-between rounded-xl border border-ink/10 bg-white/70 px-4 text-sm font-semibold text-ink/70 hover:border-moss/30 hover:text-moss"
-            >
-              Open original
-              <ArrowUpRight size={17} />
-            </a>
+          {metadata?.summary ? (
+            <section className="rounded-2xl border border-moss/12 bg-sage/55 p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
+                In brief
+              </p>
+              <p className="mt-2 text-sm leading-6 text-ink/72">
+                {metadata.summary}
+              </p>
+            </section>
           ) : null}
 
           {metadata?.key_claims?.length ? (

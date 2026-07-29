@@ -24,6 +24,12 @@ function isTweet(url: string | null) {
   }
 }
 
+/** First sentence of an enrichment summary — a one-liner that actually finishes. */
+function gist(text: string | null | undefined) {
+  if (!text) return null;
+  return text.match(/^[\s\S]*?[.!?](?=\s|$)/)?.[0] ?? text;
+}
+
 const GRADIENTS = [
   { bg: "linear-gradient(135deg,#14573f,#0e2018)", fg: "#d9f45c" },
   { bg: "linear-gradient(160deg,#f0b03f,#e8542f)", fg: "#ffffff" },
@@ -83,8 +89,8 @@ function TweetCard({ source }: { source: LibrarySource }) {
           <span className="mt-0.5 line-clamp-2 text-sm font-semibold leading-snug tracking-[-0.015em] text-ink">
             {text}
           </span>
-          <span className="mt-0.5 line-clamp-1 text-xs leading-5 text-ink/55">
-            {metadata?.summary || name}
+          <span className="mt-0.5 line-clamp-2 text-xs leading-5 text-ink/55">
+            {gist(metadata?.summary) || name}
           </span>
         </span>
       </div>
@@ -169,8 +175,8 @@ function ArticleCard({ source }: { source: LibrarySource }) {
           <span className="mt-0.5 line-clamp-2 text-sm font-semibold leading-snug tracking-[-0.015em] text-ink group-hover:text-moss">
             {source.title || "Untitled source"}
           </span>
-          <span className="mt-0.5 line-clamp-1 text-xs leading-5 text-ink/55">
-            {summary}
+          <span className="mt-0.5 block text-xs leading-5 text-ink/55">
+            {gist(summary)}
           </span>
         </span>
       </div>
@@ -196,7 +202,7 @@ function ArticleCard({ source }: { source: LibrarySource }) {
             {source.title || "Untitled source"}
           </h2>
           <p className="line-clamp-2 text-[13px] leading-relaxed text-ink/58">
-            {summary}
+            {gist(summary)}
           </p>
           {topics.length ? (
             <div className="mt-auto flex flex-wrap gap-1.5 pt-1.5">
