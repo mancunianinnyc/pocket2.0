@@ -14,6 +14,7 @@ import { ProcessingWatcher } from "@/components/processing-watcher";
 import { ShareOriginalButton } from "@/components/share-original";
 import { SourceActions } from "@/components/source-actions";
 import { SourceStatusBadge } from "@/components/source-status";
+import { StarButton } from "@/components/star-button";
 import { createClient } from "@/lib/supabase/server";
 import {
   firstMetadata,
@@ -35,7 +36,7 @@ export default async function ReaderPage({
   const { data } = await supabase
     .from("sources")
     .select(
-      "id, source_type, title, canonical_url, extracted_text, author, published_at, saved_at, status, processing_error, why_saved, source_metadata(summary, key_claims, topics, entities, content_type, reading_time_minutes, warnings, model_name)",
+      "id, source_type, title, canonical_url, extracted_text, author, published_at, saved_at, status, processing_error, why_saved, starred_at, public_blurb, source_metadata(summary, key_claims, topics, entities, content_type, reading_time_minutes, warnings, model_name)",
     )
     .eq("id", id)
     .eq("user_id", userId)
@@ -111,6 +112,11 @@ export default async function ReaderPage({
               <ShareOriginalButton
                 url={source.canonical_url}
                 title={source.title || "Saved link"}
+              />
+              <StarButton
+                sourceId={source.id}
+                starred={Boolean(source.starred_at)}
+                variant="reader"
               />
             </div>
           ) : null}

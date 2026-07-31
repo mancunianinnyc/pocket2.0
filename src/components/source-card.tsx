@@ -4,6 +4,7 @@ import {
   type LibrarySource,
 } from "@/types/library";
 import { SourceStatusBadge } from "./source-status";
+import { StarButton } from "./star-button";
 
 function domain(url: string | null) {
   if (!url) return "Note";
@@ -82,7 +83,7 @@ function TweetCard({ source }: { source: LibrarySource }) {
       className="group block rounded-[20px] border border-ink/10 bg-white transition hover:-translate-y-0.5 hover:border-moss/40 hover:shadow-[0_20px_50px_rgba(14,32,24,0.14)]"
     >
       {/* Mobile: compact row */}
-      <div className="flex items-center gap-3 p-3 sm:hidden">
+      <div className="flex items-center gap-3 p-3 pr-11 sm:hidden">
         <span
           className="flex size-[74px] shrink-0 items-center justify-center rounded-xl text-xl font-bold"
           style={{ background: gradient.bg, color: gradient.fg }}
@@ -160,7 +161,7 @@ function ArticleCard({ source }: { source: LibrarySource }) {
       className="group block overflow-hidden rounded-[20px] border border-ink/10 bg-white transition hover:-translate-y-0.5 hover:border-moss/40 hover:shadow-[0_20px_50px_rgba(14,32,24,0.14)]"
     >
       {/* Mobile: compact row */}
-      <div className="flex items-center gap-3 p-3 sm:hidden">
+      <div className="flex items-center gap-3 p-3 pr-11 sm:hidden">
         <span
           className="flex size-[74px] shrink-0 items-center justify-center rounded-xl text-2xl font-bold tracking-[-0.04em]"
           style={{ background: gradient.bg, color: gradient.fg }}
@@ -231,9 +232,23 @@ function ArticleCard({ source }: { source: LibrarySource }) {
 }
 
 export function SourceCard({ source }: { source: LibrarySource }) {
-  return isTweet(source.canonical_url) ? (
-    <TweetCard source={source} />
-  ) : (
-    <ArticleCard source={source} />
+  return (
+    /* The star sits outside the card link — a button nested in an anchor is
+       invalid, and triage shouldn't navigate. */
+    <div className="group relative">
+      {isTweet(source.canonical_url) ? (
+        <TweetCard source={source} />
+      ) : (
+        <ArticleCard source={source} />
+      )}
+      {/* Right-centred on mobile rows; on desktop it moves to the thumbnail's
+          top-left so it never collides with the status badge. */}
+      <span className="absolute right-1 top-1/2 -translate-y-1/2 sm:right-auto sm:left-1 sm:top-1 sm:translate-y-0">
+        <StarButton
+          sourceId={source.id}
+          starred={Boolean(source.starred_at)}
+        />
+      </span>
+    </div>
   );
 }

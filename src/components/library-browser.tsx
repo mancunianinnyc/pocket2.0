@@ -5,10 +5,11 @@ import { useEffect, useMemo, useState } from "react";
 import { firstMetadata, type LibrarySource } from "@/types/library";
 import { SourceCard } from "./source-card";
 
-type StatusFilter = "all" | "ready" | "processing" | "failed";
+type StatusFilter = "all" | "starred" | "ready" | "processing" | "failed";
 
 const STATUS_FILTERS: Array<{ value: StatusFilter; label: string }> = [
   { value: "all", label: "All" },
+  { value: "starred", label: "★ Featured" },
   { value: "ready", label: "Ready" },
   { value: "processing", label: "Working" },
   { value: "failed", label: "Failed" },
@@ -85,6 +86,7 @@ export function LibraryBrowser({ sources }: { sources: LibrarySource[] }) {
         if (needle && !entry.text.includes(needle)) return false;
         if (topic && !entry.topics.includes(topic)) return false;
         if (status === "all") return true;
+        if (status === "starred") return Boolean(entry.source.starred_at);
         if (status === "processing") {
           return (
             entry.source.status === "processing" ||

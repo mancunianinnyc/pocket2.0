@@ -41,7 +41,13 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/login") ||
     request.nextUrl.pathname.startsWith("/auth");
 
-  if (!isLoggedIn && !isAuthRoute && !request.nextUrl.pathname.startsWith("/api/capture")) {
+  // Token-authenticated capture and the public reading feed authenticate
+  // themselves; the session gate would turn both into a redirect to /login.
+  const isPublicRoute =
+    request.nextUrl.pathname.startsWith("/api/capture") ||
+    request.nextUrl.pathname.startsWith("/api/public/");
+
+  if (!isLoggedIn && !isAuthRoute && !isPublicRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("next", request.nextUrl.pathname);

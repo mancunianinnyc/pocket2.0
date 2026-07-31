@@ -26,6 +26,9 @@ export type LibrarySource = {
   status: SourceStatus;
   processing_error: string | null;
   why_saved: string | null;
+  /** Non-null means published on the public reading page. */
+  starred_at: string | null;
+  public_blurb: string | null;
   source_metadata: SourceMetadata | SourceMetadata[] | null;
 };
 
