@@ -4,6 +4,9 @@ import { LoaderCircle, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+/** Gold rather than a brand colour — "starred" has to read at a glance. */
+const GOLD = "#f2b32c";
+
 /**
  * Starring publishes a source to the public reading page, so the control says
  * so on the reader. On cards it is icon-only for fast triage down a long list.
@@ -55,14 +58,18 @@ export function StarButton({
         aria-pressed={on}
         className={`inline-flex h-11 items-center gap-1.5 rounded-xl border px-4 text-[13px] font-semibold transition ${
           on
-            ? "border-moss/30 bg-lime text-ink"
+            ? "border-[#f2b32c]/45 bg-[#fdf3dc] text-ink"
             : "border-ink/10 bg-white/70 text-ink/70 hover:border-moss/30 hover:text-moss"
         }`}
       >
         {busy ? (
           <LoaderCircle className="animate-spin" size={15} />
         ) : (
-          <Star size={15} fill={on ? "currentColor" : "none"} />
+          <Star
+            size={15}
+            fill={on ? GOLD : "none"}
+            color={on ? GOLD : "currentColor"}
+          />
         )}
         {on ? "Featured" : "Feature this"}
       </button>
@@ -76,21 +83,28 @@ export function StarButton({
       aria-label={label}
       aria-pressed={on}
       title={label}
-      className={`flex size-11 items-center justify-center rounded-full transition ${
-        on
-          ? "text-moss"
-          : "text-ink/35 hover:text-moss sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
-      }`}
+      className="flex size-11 items-center justify-center rounded-full"
     >
-      {busy ? (
-        <LoaderCircle className="animate-spin" size={18} />
-      ) : (
-        <Star
-          size={19}
-          fill={on ? "currentColor" : "none"}
-          className={on ? "" : "drop-shadow-[0_1px_2px_rgba(255,255,255,0.9)]"}
-        />
-      )}
+      {/* A white chip carries the star so it stays legible on both the white
+          card rows and the dark gradient thumbnails. */}
+      <span
+        className={`flex size-8 items-center justify-center rounded-full transition ${
+          on
+            ? "bg-white shadow-[0_2px_8px_rgba(14,32,24,0.28)]"
+            : "bg-white/75 text-ink/45 shadow-[0_1px_4px_rgba(14,32,24,0.18)] hover:bg-white hover:text-ink/70"
+        }`}
+        style={on ? { color: GOLD } : undefined}
+      >
+        {busy ? (
+          <LoaderCircle className="animate-spin" size={17} />
+        ) : (
+          <Star
+            size={18}
+            strokeWidth={on ? 1.5 : 2}
+            fill={on ? GOLD : "none"}
+          />
+        )}
+      </span>
     </button>
   );
 }

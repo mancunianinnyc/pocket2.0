@@ -3,6 +3,7 @@ import {
   firstMetadata,
   type LibrarySource,
 } from "@/types/library";
+import { SiteIcon } from "./site-icon";
 import { SourceStatusBadge } from "./source-status";
 import { StarButton } from "./star-button";
 
@@ -163,10 +164,16 @@ function ArticleCard({ source }: { source: LibrarySource }) {
       {/* Mobile: compact row */}
       <div className="flex items-center gap-3 p-3 pr-11 sm:hidden">
         <span
-          className="flex size-[74px] shrink-0 items-center justify-center rounded-xl text-2xl font-bold tracking-[-0.04em]"
+          className="flex size-[74px] shrink-0 items-center justify-center rounded-xl"
           style={{ background: gradient.bg, color: gradient.fg }}
         >
-          {mark}
+          <SiteIcon
+            src={source.favicon_url}
+            domain={sourceDomain}
+            mark={mark}
+            color={gradient.fg}
+            size={34}
+          />
         </span>
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-1.5 text-[11px] font-semibold text-ink/62">
@@ -196,9 +203,13 @@ function ArticleCard({ source }: { source: LibrarySource }) {
           className="relative flex aspect-[16/9] items-end p-3.5"
           style={{ background: gradient.bg, color: gradient.fg }}
         >
-          <span className="text-4xl font-bold tracking-[-0.04em] opacity-90">
-            {mark}
-          </span>
+          <SiteIcon
+            src={source.favicon_url}
+            domain={sourceDomain}
+            mark={mark}
+            color={gradient.fg}
+            size={44}
+          />
           <span className="absolute right-3 top-3">
             <SourceStatusBadge status={source.status} />
           </span>

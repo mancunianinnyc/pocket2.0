@@ -36,7 +36,7 @@ export default async function ReaderPage({
   const { data } = await supabase
     .from("sources")
     .select(
-      "id, source_type, title, canonical_url, extracted_text, author, published_at, saved_at, status, processing_error, why_saved, starred_at, public_blurb, source_metadata(summary, key_claims, topics, entities, content_type, reading_time_minutes, warnings, model_name)",
+      "id, source_type, title, canonical_url, extracted_text, author, published_at, saved_at, status, processing_error, why_saved, starred_at, public_blurb, favicon_url, source_metadata(summary, key_claims, topics, entities, content_type, reading_time_minutes, warnings, model_name)",
     )
     .eq("id", id)
     .eq("user_id", userId)

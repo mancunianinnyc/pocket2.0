@@ -98,6 +98,7 @@ export async function processSource(sourceId: string, userId: string) {
       .update({
         title: extracted.title,
         canonical_url: extracted.canonicalUrl,
+        favicon_url: extracted.faviconUrl,
         extracted_text: extracted.text,
         author: extracted.byline,
         published_at: extracted.publishedAt,

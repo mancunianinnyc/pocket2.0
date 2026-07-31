@@ -29,6 +29,7 @@ export type LibrarySource = {
   /** Non-null means published on the public reading page. */
   starred_at: string | null;
   public_blurb: string | null;
+  favicon_url: string | null;
   source_metadata: SourceMetadata | SourceMetadata[] | null;
 };
 

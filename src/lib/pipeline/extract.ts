@@ -2,6 +2,7 @@ import "server-only";
 
 import { Readability } from "@mozilla/readability";
 import { parseHTML } from "linkedom";
+import { resolveFaviconUrl } from "./favicon";
 import { assertPublicUrl, normalizePublicUrl } from "./url-safety";
 
 const MAX_RESPONSE_BYTES = 5 * 1024 * 1024;
@@ -14,6 +15,7 @@ export type ExtractedArticle = {
   publishedAt: string | null;
   canonicalUrl: string;
   text: string;
+  faviconUrl: string | null;
   warnings: string[];
 };
 
@@ -113,6 +115,31 @@ function getPublishedAt(document: Document) {
   return null;
 }
 
+/**
+ * A network-level block returns HTTP 200 with a real page, so extraction
+ * "succeeds" and the library silently stores the interstitial instead of the
+ * article. Seven saves were lost this way to Colombia's Coljuegos block, which
+ * hijacked shortener redirects during an import. Fail loudly instead.
+ */
+const INTERSTITIAL_SIGNATURES: Array<{ host: string; marker: string }> = [
+  { host: "coljuegos.gov.co", marker: "advertencia páginas online ilegales" },
+  { host: "mintic.gov.co", marker: "página bloqueada" },
+];
+
+function assertNotInterstitial(finalUrl: URL, text: string) {
+  const host = finalUrl.hostname.replace(/^www\./, "");
+  const haystack = text.slice(0, 2_000).toLowerCase();
+  const hit = INTERSTITIAL_SIGNATURES.find(
+    (signature) =>
+      host.endsWith(signature.host) || haystack.includes(signature.marker),
+  );
+  if (hit) {
+    throw new Error(
+      `That link was intercepted by a network block page (${host}), so the original article could not be read. Try again from a different network.`,
+    );
+  }
+}
+
 export async function extractUrl(input: string): Promise<ExtractedArticle> {
   const { html, finalUrl } = await fetchWithSafeRedirects(input);
   const { document } = parseHTML(html);
@@ -141,6 +168,8 @@ export async function extractUrl(input: string): Promise<ExtractedArticle> {
     throw new Error("The page did not contain enough readable text.");
   }
 
+  assertNotInterstitial(finalUrl, text);
+
   const warnings = text.length < 500 ? ["thin_extraction"] : [];
   let canonicalUrl = finalUrl.toString();
   if (canonicalHref) {
@@ -161,6 +190,7 @@ export async function extractUrl(input: string): Promise<ExtractedArticle> {
     publishedAt,
     canonicalUrl,
     text,
+    faviconUrl: resolveFaviconUrl(html, finalUrl),
     warnings,
   };
 }
