@@ -67,9 +67,10 @@ export async function GET(request: Request) {
     { count: items.length, items },
     {
       headers: {
-        // Site builds and any browser fetch can cache; a star reaches the page
-        // on the next build anyway.
-        "cache-control": "public, s-maxage=300, stale-while-revalidate=3600",
+        // Kept short on purpose: the reading page revalidates every 60s, so a
+        // longer window here would hand it a stale list and silently delay a
+        // new star by however long this cache lives.
+        "cache-control": "public, s-maxage=60, stale-while-revalidate=120",
         "access-control-allow-origin": "*",
       },
     },
