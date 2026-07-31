@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
  * Add a column here only if it is meant to be world-readable.
  */
 const PUBLIC_COLUMNS =
-  "id, title, canonical_url, author, published_at, starred_at, public_blurb, source_metadata(summary, topics, reading_time_minutes)";
+  "id, title, canonical_url, author, published_at, starred_at, public_blurb, favicon_url, source_metadata(summary, topics, reading_time_minutes)";
 
 function domain(url: string | null) {
   if (!url) return null;
@@ -49,6 +49,7 @@ export async function GET(request: Request) {
       title: row.title,
       url: row.canonical_url,
       domain: domain(row.canonical_url),
+      favicon_url: row.favicon_url,
       author: row.author,
       published_at: row.published_at,
       starred_at: row.starred_at,
