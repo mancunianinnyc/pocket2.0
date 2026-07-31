@@ -49,7 +49,9 @@ export async function GET(request: Request) {
       title: row.title,
       url: row.canonical_url,
       domain: domain(row.canonical_url),
-      favicon_url: row.favicon_url,
+      // Serve https so the icon is never blocked as mixed content on the
+      // consuming page; some sites still declare their icon over http.
+      favicon_url: row.favicon_url?.replace(/^http:\/\//, "https://") ?? null,
       author: row.author,
       published_at: row.published_at,
       starred_at: row.starred_at,

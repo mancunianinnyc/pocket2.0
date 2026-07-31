@@ -46,6 +46,8 @@ export function resolveFaviconUrl(html: string, pageUrl: URL): string | null {
       if (resolved.protocol !== "https:" && resolved.protocol !== "http:") continue;
       const host = resolved.hostname.replace(/^www\./, "");
       if (BLOCKED_ICON_HOSTS.some((blocked) => host.endsWith(blocked))) continue;
+      // An http icon is blocked as mixed content wherever it is rendered.
+      if (resolved.protocol === "http:") resolved.protocol = "https:";
       return resolved.toString();
     } catch {
       // Skip an unparseable href and try the next candidate.
