@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ServiceWorkerRegistration } from "@/components/service-worker-registration";
 import "./globals.css";
@@ -20,10 +20,23 @@ export const metadata: Metadata = {
   },
   description: "A calm place to save what matters and find it again.",
   manifest: "/manifest.webmanifest",
-  icons: {
-    icon: "/icon.svg",
-    apple: "/icon.svg",
+  appleWebApp: {
+    capable: true,
+    title: "Library",
+    statusBarStyle: "default",
   },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+};
+
+/** Parchment status bar, so the system chrome meets the app header cleanly. */
+export const viewport: Viewport = {
+  themeColor: "#f5f0e1",
 };
 
 export default function RootLayout({

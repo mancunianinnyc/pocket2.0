@@ -88,7 +88,7 @@ export function SaveSourceForm({
           {saving ? (
             <>
               <LoaderCircle className="animate-spin" size={18} />
-              Reading…
+              Saving…
             </>
           ) : (
             <>

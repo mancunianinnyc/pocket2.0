@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { z } from "zod";
 import { getAuthenticatedUserId } from "@/lib/auth";
 import { processSource } from "@/lib/pipeline/process-source";
@@ -101,24 +101,16 @@ export async function POST(request: Request) {
     );
   }
 
-  try {
-    const readySource = await processSource(source.id, userId);
-    return NextResponse.json({ source: readySource }, { status: 201 });
-  } catch (error) {
-    const { data: failedSource } = await supabase
-      .from("sources")
-      .select("id, status, title, processing_error")
-      .eq("id", source.id)
-      .eq("user_id", userId)
-      .single();
+  // Answer as soon as the row exists, then extract/enrich/embed after the
+  // response. A save from a phone share sheet must survive the app being
+  // closed a second later — the same contract /api/capture already honours.
+  after(async () => {
+    try {
+      await processSource(source.id, userId);
+    } catch {
+      // processSource persists a user-visible failure state.
+    }
+  });
 
-    return NextResponse.json(
-      {
-        source: failedSource ?? source,
-        warning:
-          error instanceof Error ? error.message : "Processing failed.",
-      },
-      { status: 201 },
-    );
-  }
+  return NextResponse.json({ source }, { status: 202 });
 }

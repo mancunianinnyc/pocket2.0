@@ -19,7 +19,7 @@ export default async function SavePage({
           Adding this to your library.
         </h1>
         <p className="mt-3 text-ink/70">
-          You can close this screen once the item opens.
+          Reading happens in the background — you can close this straight away.
         </p>
         <div className="mt-7">
           <SaveSourceForm initialUrl={url} autoSave={Boolean(url)} />

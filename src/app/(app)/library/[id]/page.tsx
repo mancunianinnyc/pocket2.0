@@ -4,11 +4,13 @@ import {
   CalendarDays,
   ChevronDown,
   Clock3,
+  LoaderCircle,
   Quote,
   UserRound,
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ProcessingWatcher } from "@/components/processing-watcher";
 import { ShareOriginalButton } from "@/components/share-original";
 import { SourceActions } from "@/components/source-actions";
 import { SourceStatusBadge } from "@/components/source-status";
@@ -48,6 +50,7 @@ export default async function ReaderPage({
 
   return (
     <main className="mx-auto max-w-6xl px-4 pb-28 pt-6 sm:px-6 md:pb-16">
+      <ProcessingWatcher status={source.status} />
       <Link
         href="/library"
         className="-ml-2 inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm font-semibold text-ink/70 hover:text-moss"
@@ -146,9 +149,13 @@ export default async function ReaderPage({
               ))}
             </div>
           ) : source.status !== "failed" ? (
-            <p className="mt-9 text-ink/70">
-              This item is still being prepared. Refresh in a moment.
-            </p>
+            <div className="mt-9 flex items-center gap-3 rounded-2xl border border-ink/8 bg-white/62 px-5 py-4">
+              <LoaderCircle className="shrink-0 animate-spin text-moss" size={18} />
+              <p className="text-sm leading-6 text-ink/70">
+                Reading this now — the text and summary land here on their own.
+                You can close the app; it keeps going.
+              </p>
+            </div>
           ) : null}
         </article>
 
