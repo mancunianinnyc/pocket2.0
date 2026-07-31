@@ -15,14 +15,14 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Personal Library",
-    template: "%s · Personal Library",
+    default: "Good Content",
+    template: "%s · Good Content",
   },
   description: "A calm place to save what matters and find it again.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
-    title: "Library",
+    title: "Good Content",
     statusBarStyle: "default",
   },
   icons: {

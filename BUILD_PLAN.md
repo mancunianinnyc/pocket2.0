@@ -1,4 +1,4 @@
-# Personal Library — Build Plan (v1)
+# Good Content — Build Plan (v1)
 
 **Status:** Approved for build. Decisions below are settled — do not relitigate them; build.
 **Date:** 2026-07-27

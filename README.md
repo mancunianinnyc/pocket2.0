@@ -1,4 +1,4 @@
-# Personal Library
+# Good Content
 
 A mobile-first personal knowledge library: save a URL quickly, keep a readable
 copy, enrich it with structured metadata, retrieve it with hybrid search, and

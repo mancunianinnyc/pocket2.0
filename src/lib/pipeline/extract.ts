@@ -57,7 +57,7 @@ async function fetchWithSafeRedirects(input: string) {
       headers: {
         accept: "text/html,application/xhtml+xml",
         "user-agent":
-          "PersonalLibrary/0.1 (+https://github.com/mancunianinnyc/personal-library)",
+          "GoodContent/0.2 (+https://github.com/mancunianinnyc/pocket2.0)",
       },
       cache: "no-store",
     });

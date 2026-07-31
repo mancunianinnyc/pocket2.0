@@ -29,7 +29,7 @@ export default async function AppLayout({
             <span className="flex size-9 items-center justify-center rounded-xl bg-lime text-ink">
               <BookOpen size={18} strokeWidth={1.8} />
             </span>
-            <span className="font-bold tracking-[-0.02em]">Personal Library</span>
+            <span className="font-bold tracking-[-0.02em]">Good Content</span>
           </Link>
 
           <PrimaryNavigation />

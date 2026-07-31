@@ -1,6 +1,6 @@
 // Bump CACHE whenever the shell list or the offline page changes — activate
 // deletes every other cache, which is how installed phones pick up new icons.
-const CACHE = "personal-library-shell-v2";
+const CACHE = "good-content-shell-v3";
 const SHELL = [
   "/manifest.webmanifest",
   "/icon.svg",

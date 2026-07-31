@@ -20,7 +20,7 @@ export default async function LoginPage({
             <BookOpen size={21} strokeWidth={1.8} />
           </span>
           <div>
-            <p className="text-sm font-semibold text-moss">Personal Library</p>
+            <p className="text-sm font-semibold text-moss">Good Content</p>
             <p className="text-xs text-ink/70">Keep the useful part.</p>
           </div>
         </div>

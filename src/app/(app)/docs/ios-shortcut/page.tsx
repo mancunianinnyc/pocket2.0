@@ -2,8 +2,8 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 const steps = [
-  "Open Settings in Personal Library, create an “iPhone Shortcut” token, and copy it.",
-  "In Apple Shortcuts, create “Save to Personal Library” and enable Show in Share Sheet for URLs.",
+  "Open Settings in Good Content, create an “iPhone Shortcut” token, and copy it.",
+  "In Apple Shortcuts, create “Save to Good Content” and enable Show in Share Sheet for URLs.",
   "Add Get Contents of URL. Use your production /api/capture URL and choose POST.",
   "Add Authorization: Bearer YOUR_CAPTURE_TOKEN and Content-Type: application/json headers.",
   "Set the JSON body field “url” to Shortcut Input, then save and test from Safari.",
@@ -25,7 +25,7 @@ export default function IosShortcutPage() {
       </Link>
       <p className="mt-8 text-sm font-semibold text-clay">iOS capture</p>
       <h1 className="mt-2 text-4xl font-semibold tracking-[-0.045em]">
-        Add Personal Library to the Share Sheet.
+        Add Good Content to the Share Sheet.
       </h1>
       <p className="mt-4 max-w-xl leading-7 text-ink/70">
         Do this once. Afterward, saving any Safari link is a single Share Sheet

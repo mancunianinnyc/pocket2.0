@@ -1,4 +1,4 @@
-# Personal Library — Claude Code Handoff
+# Good Content — Claude Code Handoff
 
 **Prepared:** 2026-07-27  
 **Owner:** Ross Garlick (`rossgarlick@gmail.com`)  
@@ -98,7 +98,7 @@ The production build successfully compiled all application routes, including:
 
 The source sync was checked: 64 source/configuration files matched between the verified staging copy and the requested project directory, excluding dependencies and build artifacts.
 
-These checks only prove compilation and static correctness. Nothing has been tested against a live Personal Library Supabase database or live AI API keys yet.
+These checks only prove compilation and static correctness. Nothing has been tested against a live Good Content Supabase database or live AI API keys yet.
 
 ## Cloud connection findings
 
@@ -355,7 +355,7 @@ Still needed:
 Paste the following into the new Claude Code session:
 
 ```text
-Continue the Personal Library project in:
+Continue the Good Content project in:
 C:\Users\rossg\Claude Workspace\personal-library
 
 Read BUILD_PLAN.md, AGENTS.md, README.md, and PERSONAL_LIBRARY_HANDOFF.md if I

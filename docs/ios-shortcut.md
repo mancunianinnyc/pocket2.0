@@ -1,18 +1,18 @@
-# iOS Shortcut: Save to Personal Library
+# iOS Shortcut: Save to Good Content
 
-This adds **Personal Library** to the iPhone Share Sheet. Setup takes about two
+This adds **Good Content** to the iPhone Share Sheet. Setup takes about two
 minutes and only needs to be done once.
 
 ## Before you start
 
-1. Open Personal Library → **Settings**.
+1. Open Good Content → **Settings**.
 2. Create a capture token labeled `iPhone Shortcut`.
 3. Copy it immediately. The full token is shown only once.
 
 ## Build the Shortcut
 
 1. Open Apple’s **Shortcuts** app and tap **+**.
-2. Name the shortcut `Save to Personal Library`.
+2. Name the shortcut `Save to Good Content`.
 3. Open the shortcut details, enable **Show in Share Sheet**, and set the
    accepted input to **URLs**.
 4. Add **Get Contents of URL**.
@@ -36,7 +36,7 @@ minutes and only needs to be done once.
    url: Shortcut Input
    ```
 
-9. Optionally add **Show Notification** with the text `Saved to Personal Library`.
+9. Optionally add **Show Notification** with the text `Saved to Good Content`.
 
 ## Test it
 

@@ -1,6 +1,6 @@
 {
-  "name": "Personal Library",
-  "short_name": "Library",
+  "name": "Good Content",
+  "short_name": "Good Content",
   "description": "Save anything quickly and recover the useful idea later.",
   "start_url": "/library",
   "scope": "/",

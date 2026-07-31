@@ -13,7 +13,7 @@ To install:
 
 1. Supabase dashboard → your project → **Authentication** → **Emails** →
    **Magic Link** (the template tabs, not the SMTP provider section below them).
-2. Subject: `Your Personal Library sign-in link`
+2. Subject: `Your Good Content sign-in link`
 3. Paste the entire contents of `magic-link.html` into the message body, save.
 4. Send yourself a link from `/login` and check it on a phone.
 

@@ -1,4 +1,4 @@
-# Personal Library agent guide
+# Good Content agent guide
 
 - Follow `BUILD_PLAN.md`; its product and stack decisions are settled.
 - Keep the UI mobile-first and calm.

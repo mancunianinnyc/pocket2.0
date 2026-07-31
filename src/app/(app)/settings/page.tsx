@@ -82,7 +82,7 @@ export default async function SettingsPage() {
             href={bookmarklet}
             className="mt-5 inline-flex rounded-xl bg-moss px-4 py-2.5 text-sm font-semibold text-white"
           >
-            Save to Personal Library
+            Save to Good Content
           </a>
         </section>
       </div>
