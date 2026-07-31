@@ -84,7 +84,7 @@ function TweetCard({ source }: { source: LibrarySource }) {
       className="group block rounded-[20px] border border-ink/10 bg-white transition hover:-translate-y-0.5 hover:border-moss/40 hover:shadow-[0_20px_50px_rgba(14,32,24,0.14)]"
     >
       {/* Mobile: compact row */}
-      <div className="flex items-center gap-3 p-3 pr-11 sm:hidden">
+      <div className="flex items-start gap-3 p-3 pr-11 sm:hidden">
         <span
           className="flex size-[74px] shrink-0 items-center justify-center rounded-xl text-xl font-bold"
           style={{ background: gradient.bg, color: gradient.fg }}
@@ -162,7 +162,7 @@ function ArticleCard({ source }: { source: LibrarySource }) {
       className="group block overflow-hidden rounded-[20px] border border-ink/10 bg-white transition hover:-translate-y-0.5 hover:border-moss/40 hover:shadow-[0_20px_50px_rgba(14,32,24,0.14)]"
     >
       {/* Mobile: compact row */}
-      <div className="flex items-center gap-3 p-3 pr-11 sm:hidden">
+      <div className="flex items-start gap-3 p-3 pr-11 sm:hidden">
         <span
           className="flex size-[74px] shrink-0 items-center justify-center rounded-xl"
           style={{ background: gradient.bg, color: gradient.fg }}
@@ -191,7 +191,7 @@ function ArticleCard({ source }: { source: LibrarySource }) {
           <span className="mt-1 line-clamp-2 text-[15px] font-semibold leading-snug tracking-[-0.015em] text-ink group-hover:text-moss">
             {source.title || "Untitled source"}
           </span>
-          <span className="mt-1 block text-xs leading-5 text-ink/70">
+          <span className="mt-1 line-clamp-3 text-xs leading-5 text-ink/70">
             {gist(summary)}
           </span>
         </span>
@@ -254,7 +254,7 @@ export function SourceCard({ source }: { source: LibrarySource }) {
       )}
       {/* Right-centred on mobile rows; on desktop it moves to the thumbnail's
           top-left so it never collides with the status badge. */}
-      <span className="absolute right-1 top-1/2 -translate-y-1/2 sm:right-auto sm:left-1 sm:top-1 sm:translate-y-0">
+      <span className="absolute right-1 top-2 sm:right-auto sm:left-1 sm:top-1">
         <StarButton
           sourceId={source.id}
           starred={Boolean(source.starred_at)}

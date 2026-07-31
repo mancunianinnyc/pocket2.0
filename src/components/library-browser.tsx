@@ -203,7 +203,10 @@ export function LibraryBrowser({ sources }: { sources: LibrarySource[] }) {
       </div>
 
       {results.length ? (
-        <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-4">
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-4">
+          {/* grid-cols-1 is load-bearing: without an explicit minmax(0,1fr)
+              track the single column sizes to content, and cards overflow the
+              container on a phone. */}
           {results.map((source) => (
             <SourceCard key={source.id} source={source} />
           ))}

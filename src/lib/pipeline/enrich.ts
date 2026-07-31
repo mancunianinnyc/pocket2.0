@@ -1,9 +1,7 @@
 import "server-only";
 
-import Anthropic from "@anthropic-ai/sdk";
-import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
-import { getAnthropicApiKey } from "@/lib/env";
+import { generateStructured } from "@/lib/llm";
 
 // Length/size caps are enforced by normalizeEnrichment below, not by the parse
 // schema: the API strips maxLength/maxItems from the schema it sends, so the
@@ -56,13 +54,6 @@ function normalizeEnrichment(
   });
 }
 
-let anthropicClient: Anthropic | undefined;
-
-function getAnthropicClient() {
-  anthropicClient ??= new Anthropic({ apiKey: getAnthropicApiKey() });
-  return anthropicClient;
-}
-
 export type Enrichment = z.infer<typeof enrichmentSchema>;
 
 export async function enrichArticle(input: {
@@ -71,27 +62,14 @@ export async function enrichArticle(input: {
   text: string;
   extractionWarnings: string[];
 }) {
-  const model = process.env.ANTHROPIC_MODEL || "claude-opus-5";
-  const message = await getAnthropicClient().messages.parse({
-    model,
-    max_tokens: 3_000,
-    thinking: { type: "adaptive" },
-    output_config: {
-      format: zodOutputFormat(enrichmentResponseSchema),
-    },
+  const { data, model } = await generateStructured({
+    name: "article_enrichment",
+    schema: enrichmentResponseSchema,
+    maxTokens: 3_000,
     system:
       "You organize a private reading library. Extract only facts supported by the supplied article. Never invent missing metadata. Keep summaries calm, specific, and useful for later retrieval. Topic labels must be lowercase. Limits: at most 8 key claims, 6 topics, 15 entities, 10 warnings; summary under 1200 characters.",
-    messages: [
-      {
-        role: "user",
-        content: `Title: ${input.title}\nURL: ${input.url}\nExtraction warnings: ${input.extractionWarnings.join(", ") || "none"}\n\nArticle:\n${input.text.slice(0, 50_000)}`,
-      },
-    ],
+    user: `Title: ${input.title}\nURL: ${input.url}\nExtraction warnings: ${input.extractionWarnings.join(", ") || "none"}\n\nArticle:\n${input.text.slice(0, 50_000)}`,
   });
 
-  if (!message.parsed_output) {
-    throw new Error("The enrichment model returned no structured output.");
-  }
-
-  return { enrichment: normalizeEnrichment(message.parsed_output), model };
+  return { enrichment: normalizeEnrichment(data), model };
 }

@@ -1,9 +1,7 @@
 import "server-only";
 
-import Anthropic from "@anthropic-ai/sdk";
-import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
-import { getAnthropicApiKey } from "@/lib/env";
+import { generateStructured } from "@/lib/llm";
 
 /** Hard ceiling for the published line — two comfortable lines on a phone. */
 export const BLURB_MAX_CHARS = 160;
@@ -14,13 +12,6 @@ export const BLURB_MAX_CHARS = 160;
 const blurbResponseSchema = z.object({
   blurb: z.string().min(1),
 });
-
-let anthropicClient: Anthropic | undefined;
-
-function getAnthropicClient() {
-  anthropicClient ??= new Anthropic({ apiKey: getAnthropicApiKey() });
-  return anthropicClient;
-}
 
 /** Trim to the last whole word inside the limit rather than cutting mid-word. */
 function clamp(text: string) {
@@ -41,15 +32,10 @@ export async function generateBlurb(input: {
   author?: string | null;
   contentType?: string | null;
 }) {
-  const model = process.env.ANTHROPIC_MODEL || "claude-opus-5";
-  const message = await getAnthropicClient().messages.parse({
-    model,
-    max_tokens: 1_000,
-    thinking: { type: "adaptive" },
-    output_config: {
-      format: zodOutputFormat(blurbResponseSchema),
-      effort: "low",
-    },
+  const { data } = await generateStructured({
+    name: "public_blurb",
+    schema: blurbResponseSchema,
+    maxTokens: 1_000,
     system: [
       "You write the one-line note that sits under a link on someone's personal reading page.",
       // Aim well under the clamp: a line that gets truncated ends in an
@@ -59,25 +45,17 @@ export async function generateBlurb(input: {
       "Never open with meta framing like 'This article', 'A tweet by', 'The author argues', or the publication name.",
       "Never invent anything absent from the supplied summary. Plain sentence case, no quotation marks, no trailing ellipsis.",
     ].join(" "),
-    messages: [
-      {
-        role: "user",
-        content: [
-          `Title: ${input.title}`,
-          input.author ? `Author: ${input.author}` : null,
-          input.contentType ? `Type: ${input.contentType}` : null,
-          "",
-          `Summary:\n${input.summary.slice(0, 4_000)}`,
-        ]
-          .filter((line) => line !== null)
-          .join("\n"),
-      },
-    ],
+    user: [
+      `Title: ${input.title}`,
+      input.author ? `Author: ${input.author}` : null,
+      input.contentType ? `Type: ${input.contentType}` : null,
+      "",
+      `Summary:
+${input.summary.slice(0, 4_000)}`,
+    ]
+      .filter((line) => line !== null)
+      .join("\n"),
   });
 
-  if (!message.parsed_output) {
-    throw new Error("The blurb model returned no structured output.");
-  }
-
-  return clamp(message.parsed_output.blurb);
+  return clamp(data.blurb);
 }
