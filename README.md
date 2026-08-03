@@ -4,6 +4,8 @@ A mobile-first personal knowledge library: save a URL quickly, keep a readable
 copy, enrich it with structured metadata, retrieve it with hybrid search, and
 ask questions that cite exact saved passages.
 
+**Current state and what's next: [ROADMAP.md](ROADMAP.md).**
+
 ## What is implemented
 
 - Magic-link authentication with a Ross-only allowlist in the first migration.
