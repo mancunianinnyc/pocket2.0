@@ -113,12 +113,21 @@ async function fetchInnertubeFacts(
       context: { client: clientContext },
     }),
   });
-  if (!response.ok) return null;
+  if (!response.ok) {
+    console.warn(
+      `[youtube] innertube ${client.clientName} http ${response.status} for ${videoId}`,
+    );
+    return null;
+  }
   const data = (await response.json()) as {
+    playabilityStatus?: { status?: string };
     videoDetails?: { shortDescription?: string; lengthSeconds?: string };
     microformat?: { playerMicroformatRenderer?: { publishDate?: string } };
   };
   const details = data.videoDetails;
+  console.warn(
+    `[youtube] innertube ${client.clientName} playability=${data.playabilityStatus?.status} desc=${details?.shortDescription?.length ?? 0} for ${videoId}`,
+  );
   if (!details) return null;
 
   const date = data.microformat?.playerMicroformatRenderer?.publishDate;
