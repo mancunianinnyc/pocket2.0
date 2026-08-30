@@ -61,12 +61,16 @@ export async function enrichArticle(input: {
   url: string;
   text: string;
   extractionWarnings: string[];
-  kind?: "article" | "video";
+  kind?: "article" | "video" | "podcast";
 }) {
-  const videoNote =
-    input.kind === "video"
-      ? "\n\nThis is a YouTube video. The text is its title, channel, and description — not a transcript — so describe what the video is about and keep key claims to what the description itself states."
-      : "";
+  const kindNotes = {
+    article: "",
+    video:
+      "\n\nThis is a YouTube video. The text is its title, channel, and description — not a transcript — so describe what the video is about and keep key claims to what the description itself states.",
+    podcast:
+      "\n\nThis is a Spotify link. The text is its title and Spotify's description — not a transcript — so describe what it is about and keep key claims to what the description itself states.",
+  };
+  const videoNote = kindNotes[input.kind ?? "article"];
   const { data, model } = await generateStructured({
     name: "article_enrichment",
     schema: enrichmentResponseSchema,

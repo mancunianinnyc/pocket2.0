@@ -3,9 +3,12 @@ import "server-only";
 import { Readability } from "@mozilla/readability";
 import { parseHTML } from "linkedom";
 import { resolveFaviconUrl } from "./favicon";
+import { extractPdf } from "./pdf";
 import { assertPublicUrl, normalizePublicUrl } from "./url-safety";
 
 const MAX_RESPONSE_BYTES = 5 * 1024 * 1024;
+/** PDFs run heavier than pages — investor letters routinely pass 5 MB. */
+const MAX_PDF_BYTES = 25 * 1024 * 1024;
 const MAX_REDIRECTS = 5;
 const FETCH_TIMEOUT_MS = 15_000;
 
@@ -19,7 +22,7 @@ export type ExtractedArticle = {
   warnings: string[];
 };
 
-async function readLimitedBody(response: Response) {
+async function readLimitedBody(response: Response, maxBytes: number) {
   if (!response.body) throw new Error("The site returned an empty response.");
 
   const reader = response.body.getReader();
@@ -30,9 +33,11 @@ async function readLimitedBody(response: Response) {
     const { value, done } = await reader.read();
     if (done) break;
     total += value.byteLength;
-    if (total > MAX_RESPONSE_BYTES) {
+    if (total > maxBytes) {
       await reader.cancel();
-      throw new Error("That page is larger than the 5 MB capture limit.");
+      throw new Error(
+        `That file is larger than the ${Math.round(maxBytes / 1024 / 1024)} MB capture limit.`,
+      );
     }
     chunks.push(value);
   }
@@ -44,11 +49,36 @@ async function readLimitedBody(response: Response) {
     offset += chunk.byteLength;
   }
 
-  return new TextDecoder("utf-8").decode(body);
+  return body;
 }
 
-async function fetchWithSafeRedirects(input: string) {
-  let url = normalizePublicUrl(input);
+/**
+ * Dropbox share links (`?dl=0`) serve a JavaScript preview app with no
+ * readable content; `dl=1` serves the file itself. Only rewrite the share
+ * paths — folder and home links stay untouched.
+ */
+function normalizeDropboxUrl(url: URL) {
+  const host = url.hostname.replace(/^www\./, "");
+  if (host !== "dropbox.com") return url;
+  if (!/^\/(?:scl\/fi|s)\//.test(url.pathname)) return url;
+  const direct = new URL(url.toString());
+  direct.searchParams.set("dl", "1");
+  return direct;
+}
+
+/** PDFs travel under many content-types (Dropbox says application/binary). */
+function looksLikePdf(contentType: string, body: Uint8Array) {
+  if (contentType.includes("application/pdf")) return true;
+  const magic = String.fromCharCode(...body.slice(0, 5));
+  return magic === "%PDF-";
+}
+
+type FetchedDocument =
+  | { kind: "html"; html: string; finalUrl: URL }
+  | { kind: "pdf"; bytes: Uint8Array; finalUrl: URL };
+
+async function fetchWithSafeRedirects(input: string): Promise<FetchedDocument> {
+  let url = normalizeDropboxUrl(normalizePublicUrl(input));
 
   for (let redirectCount = 0; redirectCount <= MAX_REDIRECTS; redirectCount += 1) {
     await assertPublicUrl(url);
@@ -57,7 +87,7 @@ async function fetchWithSafeRedirects(input: string) {
       redirect: "manual",
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
       headers: {
-        accept: "text/html,application/xhtml+xml",
+        accept: "text/html,application/xhtml+xml,application/pdf",
         "user-agent":
           "GoodContent/0.2 (+https://github.com/mancunianinnyc/pocket2.0)",
       },
@@ -76,11 +106,20 @@ async function fetchWithSafeRedirects(input: string) {
     }
 
     const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
-    if (!contentType.includes("text/html") && !contentType.includes("xhtml")) {
-      throw new Error("This link is not an HTML article.");
+    if (contentType.includes("text/html") || contentType.includes("xhtml")) {
+      const body = await readLimitedBody(response, MAX_RESPONSE_BYTES);
+      return {
+        kind: "html",
+        html: new TextDecoder("utf-8").decode(body),
+        finalUrl: url,
+      };
     }
 
-    return { html: await readLimitedBody(response), finalUrl: url };
+    const bytes = await readLimitedBody(response, MAX_PDF_BYTES);
+    if (looksLikePdf(contentType, bytes)) {
+      return { kind: "pdf", bytes, finalUrl: url };
+    }
+    throw new Error("This link is not an HTML article or a PDF.");
   }
 
   throw new Error("The site redirected too many times.");
@@ -141,7 +180,15 @@ function assertNotInterstitial(finalUrl: URL, text: string) {
 }
 
 export async function extractUrl(input: string): Promise<ExtractedArticle> {
-  const { html, finalUrl } = await fetchWithSafeRedirects(input);
+  const fetched = await fetchWithSafeRedirects(input);
+
+  if (fetched.kind === "pdf") {
+    // Keep the link the user saved (e.g. the Dropbox share URL) — the final
+    // fetch URL is often an ephemeral content-host address.
+    return extractPdf(fetched.bytes, normalizePublicUrl(input));
+  }
+
+  const { html, finalUrl } = fetched;
   const { document } = parseHTML(html);
   const canonicalHref = document
     .querySelector('link[rel="canonical"]')

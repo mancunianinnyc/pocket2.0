@@ -5,6 +5,7 @@ import { chunkText } from "./chunk";
 import { embedTexts } from "./embed";
 import { enrichArticle } from "./enrich";
 import { extractUrl } from "./extract";
+import { extractSpotify, getSpotifyRef } from "./spotify";
 import { extractYouTube, getYouTubeVideoId } from "./youtube";
 
 function safeErrorMessage(error: unknown) {
@@ -37,9 +38,12 @@ export async function processSource(sourceId: string, userId: string) {
 
   try {
     const videoId = getYouTubeVideoId(source.canonical_url);
+    const spotifyRef = videoId ? null : getSpotifyRef(source.canonical_url);
     const extracted = videoId
       ? await extractYouTube(videoId)
-      : await extractUrl(source.canonical_url);
+      : spotifyRef
+        ? await extractSpotify(spotifyRef)
+        : await extractUrl(source.canonical_url);
     const chunks = chunkText(extracted.text);
     if (!chunks.length) throw new Error("The article could not be chunked.");
 
@@ -49,7 +53,7 @@ export async function processSource(sourceId: string, userId: string) {
         url: extracted.canonicalUrl,
         text: extracted.text,
         extractionWarnings: extracted.warnings,
-        kind: videoId ? "video" : "article",
+        kind: videoId ? "video" : spotifyRef ? "podcast" : "article",
       }),
       embedTexts(chunks.map((chunk) => chunk.text)),
     ]);
