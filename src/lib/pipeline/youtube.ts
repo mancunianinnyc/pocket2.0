@@ -65,11 +65,104 @@ function metaContent(html: string, name: string) {
   return content ? decodeEntities(content) : null;
 }
 
+type VideoFacts = {
+  description: string;
+  publishedAt: string | null;
+  durationMinutes: number | null;
+};
+
+/**
+ * The innertube player endpoint is what YouTube's own web client calls, and it
+ * answers from datacenter IPs (Vercel) where the watch page comes back
+ * stripped of its player payload. "UNPLAYABLE" only means the anonymous
+ * client can't stream — the metadata is still complete.
+ */
+async function fetchInnertubeFacts(videoId: string): Promise<VideoFacts | null> {
+  const response = await fetch("https://www.youtube.com/youtubei/v1/player", {
+    method: "POST",
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    headers: { "content-type": "application/json", "user-agent": USER_AGENT },
+    cache: "no-store",
+    body: JSON.stringify({
+      videoId,
+      context: {
+        client: { clientName: "WEB", clientVersion: "2.20240101.00.00" },
+      },
+    }),
+  });
+  if (!response.ok) return null;
+  const data = (await response.json()) as {
+    videoDetails?: { shortDescription?: string; lengthSeconds?: string };
+    microformat?: { playerMicroformatRenderer?: { publishDate?: string } };
+  };
+  const details = data.videoDetails;
+  if (!details) return null;
+
+  const date = data.microformat?.playerMicroformatRenderer?.publishDate;
+  const seconds = Number(details.lengthSeconds);
+  return {
+    description: details.shortDescription ?? "",
+    publishedAt:
+      date && !Number.isNaN(Date.parse(date))
+        ? new Date(date).toISOString()
+        : null,
+    durationMinutes:
+      Number.isFinite(seconds) && seconds > 0
+        ? Math.max(1, Math.round(seconds / 60))
+        : null,
+  };
+}
+
+/** Scrape the watch page's initial payload — the fallback when innertube shifts. */
+async function fetchWatchPageFacts(videoId: string): Promise<VideoFacts | null> {
+  const response = await fetch(`https://www.youtube.com/watch?v=${videoId}`, {
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    headers: {
+      accept: "text/html,application/xhtml+xml",
+      "user-agent": USER_AGENT,
+    },
+    cache: "no-store",
+  });
+  if (!response.ok) return null;
+  const html = (await response.text()).slice(0, 3_000_000);
+
+  let description = "";
+  const rawDescription = html.match(
+    /"shortDescription":"((?:[^"\\]|\\.)*)"/,
+  )?.[1];
+  if (rawDescription) {
+    try {
+      description = JSON.parse(`"${rawDescription}"`) as string;
+    } catch {
+      // Fall through to the meta tag.
+    }
+  }
+  if (!description) {
+    description = metaContent(html, "description") ?? "";
+  }
+
+  const date =
+    html.match(/"publishDate":"([^"]+)"/)?.[1] ??
+    metaContent(html, "datePublished");
+  const seconds = Number(html.match(/"lengthSeconds":"(\d+)"/)?.[1]);
+  return {
+    description,
+    publishedAt:
+      date && !Number.isNaN(Date.parse(date))
+        ? new Date(date).toISOString()
+        : null,
+    durationMinutes:
+      Number.isFinite(seconds) && seconds > 0
+        ? Math.max(1, Math.round(seconds / 60))
+        : null,
+  };
+}
+
 /**
  * Watch pages are all client-rendered JavaScript, so Readability finds nothing
  * on them. YouTube's own metadata is enough for the library: oEmbed carries
- * title, channel, and thumbnail with no API key, and the watch page's initial
- * payload carries the description, publish date, and duration.
+ * title, channel, and thumbnail with no API key; innertube (with the watch
+ * page as fallback) carries the description, publish date, and duration.
  */
 export async function extractYouTube(videoId: string): Promise<ExtractedVideo> {
   const canonicalUrl = `https://www.youtube.com/watch?v=${videoId}`;
@@ -92,52 +185,24 @@ export async function extractYouTube(videoId: string): Promise<ExtractedVideo> {
   if (!title) throw new Error("YouTube returned no title for that video.");
   const author = oembed.author_name?.trim() || null;
 
-  // Everything from the watch page is gravy on top of oEmbed — a blocked or
-  // reshaped page must never fail the save.
-  let description = "";
-  let publishedAt: string | null = null;
-  let durationMinutes: number | null = null;
+  // Everything past oEmbed is gravy — a blocked or reshaped source must never
+  // fail the save.
+  let facts: VideoFacts | null = null;
   try {
-    const pageResponse = await fetch(canonicalUrl, {
-      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-      headers: {
-        accept: "text/html,application/xhtml+xml",
-        "user-agent": USER_AGENT,
-      },
-      cache: "no-store",
-    });
-    if (pageResponse.ok) {
-      const html = (await pageResponse.text()).slice(0, 3_000_000);
-
-      const rawDescription = html.match(
-        /"shortDescription":"((?:[^"\\]|\\.)*)"/,
-      )?.[1];
-      if (rawDescription) {
-        try {
-          description = JSON.parse(`"${rawDescription}"`) as string;
-        } catch {
-          // Fall through to the meta tag.
-        }
-      }
-      if (!description) {
-        description = metaContent(html, "description") ?? "";
-      }
-
-      const date =
-        html.match(/"publishDate":"([^"]+)"/)?.[1] ??
-        metaContent(html, "datePublished");
-      if (date && !Number.isNaN(Date.parse(date))) {
-        publishedAt = new Date(date).toISOString();
-      }
-
-      const seconds = Number(html.match(/"lengthSeconds":"(\d+)"/)?.[1]);
-      if (Number.isFinite(seconds) && seconds > 0) {
-        durationMinutes = Math.max(1, Math.round(seconds / 60));
-      }
-    }
+    facts = await fetchInnertubeFacts(videoId);
   } catch {
-    // Keep the oEmbed-only result.
+    // Try the watch page instead.
   }
+  if (!facts?.description) {
+    try {
+      facts = (await fetchWatchPageFacts(videoId)) ?? facts;
+    } catch {
+      // Keep whatever innertube produced, or the oEmbed-only result.
+    }
+  }
+  let description = facts?.description ?? "";
+  const publishedAt = facts?.publishedAt ?? null;
+  const durationMinutes = facts?.durationMinutes ?? null;
 
   description = description.trim();
   const text = [
