@@ -71,6 +71,57 @@ type VideoFacts = {
   durationMinutes: number | null;
 };
 
+/** ISO 8601 duration ("PT53M26S") → whole minutes, minimum 1. */
+function parseIsoDurationMinutes(value: string | undefined) {
+  const match = value?.match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/);
+  if (!match) return null;
+  const seconds =
+    Number(match[1] ?? 0) * 3600 + Number(match[2] ?? 0) * 60 + Number(match[3] ?? 0);
+  return seconds > 0 ? Math.max(1, Math.round(seconds / 60)) : null;
+}
+
+/**
+ * The official Data API is the only YouTube surface that reliably answers
+ * datacenter IPs — every anonymous innertube client gets the
+ * "sign in to confirm you're not a bot" gate from Vercel. Free tier covers
+ * 10,000 lookups/day; without YOUTUBE_API_KEY this quietly does nothing and
+ * saves keep title/channel/thumbnail from oEmbed.
+ */
+async function fetchDataApiFacts(videoId: string): Promise<VideoFacts | null> {
+  const key = process.env.YOUTUBE_API_KEY;
+  if (!key) return null;
+  const response = await fetch(
+    `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${videoId}&key=${key}`,
+    {
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      headers: { accept: "application/json" },
+      cache: "no-store",
+    },
+  );
+  if (!response.ok) {
+    console.warn(`[youtube] data api http ${response.status} for ${videoId}`);
+    return null;
+  }
+  const data = (await response.json()) as {
+    items?: Array<{
+      snippet?: { description?: string; publishedAt?: string };
+      contentDetails?: { duration?: string };
+    }>;
+  };
+  const item = data.items?.[0];
+  if (!item) return null;
+
+  const date = item.snippet?.publishedAt;
+  return {
+    description: item.snippet?.description ?? "",
+    publishedAt:
+      date && !Number.isNaN(Date.parse(date))
+        ? new Date(date).toISOString()
+        : null,
+    durationMinutes: parseIsoDurationMinutes(item.contentDetails?.duration),
+  };
+}
+
 /**
  * Innertube client identities to try in order. Datacenter IPs (Vercel) get a
  * "sign in to confirm you're not a bot" gate on the WEB client, which returns
@@ -235,6 +286,11 @@ export async function extractYouTube(videoId: string): Promise<ExtractedVideo> {
   const complete = () =>
     Boolean(merged.description && merged.publishedAt && merged.durationMinutes);
 
+  try {
+    absorb(await fetchDataApiFacts(videoId));
+  } catch {
+    // Fall through to innertube.
+  }
   for (const client of INNERTUBE_CLIENTS) {
     if (complete()) break;
     try {
