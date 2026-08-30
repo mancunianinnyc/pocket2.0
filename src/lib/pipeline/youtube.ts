@@ -72,22 +72,45 @@ type VideoFacts = {
 };
 
 /**
- * The innertube player endpoint is what YouTube's own web client calls, and it
- * answers from datacenter IPs (Vercel) where the watch page comes back
- * stripped of its player payload. "UNPLAYABLE" only means the anonymous
- * client can't stream — the metadata is still complete.
+ * Innertube client identities to try in order. Datacenter IPs (Vercel) get a
+ * "sign in to confirm you're not a bot" gate on the WEB client, which returns
+ * no videoDetails; the ANDROID app identity is usually exempt from that gate.
+ * "UNPLAYABLE" is fine either way — it only gates streaming, not metadata.
  */
-async function fetchInnertubeFacts(videoId: string): Promise<VideoFacts | null> {
+const INNERTUBE_CLIENTS = [
+  {
+    clientName: "ANDROID",
+    clientVersion: "20.10.38",
+    androidSdkVersion: 30,
+    osName: "Android",
+    osVersion: "11",
+    userAgent: "com.google.android.youtube/20.10.38 (Linux; U; Android 11) gzip",
+  },
+  {
+    clientName: "MWEB",
+    clientVersion: "2.20240101.00.00",
+    userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X)",
+  },
+  {
+    clientName: "WEB",
+    clientVersion: "2.20240101.00.00",
+    userAgent: USER_AGENT,
+  },
+];
+
+async function fetchInnertubeFacts(
+  videoId: string,
+  client: (typeof INNERTUBE_CLIENTS)[number],
+): Promise<VideoFacts | null> {
+  const { userAgent, ...clientContext } = client;
   const response = await fetch("https://www.youtube.com/youtubei/v1/player", {
     method: "POST",
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-    headers: { "content-type": "application/json", "user-agent": USER_AGENT },
+    headers: { "content-type": "application/json", "user-agent": userAgent },
     cache: "no-store",
     body: JSON.stringify({
       videoId,
-      context: {
-        client: { clientName: "WEB", clientVersion: "2.20240101.00.00" },
-      },
+      context: { client: clientContext },
     }),
   });
   if (!response.ok) return null;
@@ -187,22 +210,40 @@ export async function extractYouTube(videoId: string): Promise<ExtractedVideo> {
 
   // Everything past oEmbed is gravy — a blocked or reshaped source must never
   // fail the save.
-  let facts: VideoFacts | null = null;
-  try {
-    facts = await fetchInnertubeFacts(videoId);
-  } catch {
-    // Try the watch page instead.
-  }
-  if (!facts?.description) {
+  // Clients differ in what they surface (ANDROID skips the bot gate but omits
+  // the publish date; MWEB carries it), so merge field-by-field until full.
+  const merged: VideoFacts = {
+    description: "",
+    publishedAt: null,
+    durationMinutes: null,
+  };
+  const absorb = (facts: VideoFacts | null) => {
+    if (!facts) return;
+    merged.description ||= facts.description;
+    merged.publishedAt ??= facts.publishedAt;
+    merged.durationMinutes ??= facts.durationMinutes;
+  };
+  const complete = () =>
+    Boolean(merged.description && merged.publishedAt && merged.durationMinutes);
+
+  for (const client of INNERTUBE_CLIENTS) {
+    if (complete()) break;
     try {
-      facts = (await fetchWatchPageFacts(videoId)) ?? facts;
+      absorb(await fetchInnertubeFacts(videoId, client));
     } catch {
-      // Keep whatever innertube produced, or the oEmbed-only result.
+      // Try the next client.
     }
   }
-  let description = facts?.description ?? "";
-  const publishedAt = facts?.publishedAt ?? null;
-  const durationMinutes = facts?.durationMinutes ?? null;
+  if (!complete()) {
+    try {
+      absorb(await fetchWatchPageFacts(videoId));
+    } catch {
+      // Keep whatever the innertube clients produced.
+    }
+  }
+  let description = merged.description;
+  const publishedAt = merged.publishedAt;
+  const durationMinutes = merged.durationMinutes;
 
   description = description.trim();
   const text = [
