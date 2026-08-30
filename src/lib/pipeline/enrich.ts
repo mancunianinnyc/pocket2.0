@@ -61,14 +61,19 @@ export async function enrichArticle(input: {
   url: string;
   text: string;
   extractionWarnings: string[];
+  kind?: "article" | "video";
 }) {
+  const videoNote =
+    input.kind === "video"
+      ? "\n\nThis is a YouTube video. The text is its title, channel, and description — not a transcript — so describe what the video is about and keep key claims to what the description itself states."
+      : "";
   const { data, model } = await generateStructured({
     name: "article_enrichment",
     schema: enrichmentResponseSchema,
     maxTokens: 3_000,
     system:
-      "You organize a private reading library. Extract only facts supported by the supplied article. Never invent missing metadata. Keep summaries calm, specific, and useful for later retrieval. Topic labels must be lowercase. Limits: at most 8 key claims, 6 topics, 15 entities, 10 warnings; summary under 1200 characters.",
-    user: `Title: ${input.title}\nURL: ${input.url}\nExtraction warnings: ${input.extractionWarnings.join(", ") || "none"}\n\nArticle:\n${input.text.slice(0, 50_000)}`,
+      "You organize a private reading library. Extract only facts supported by the supplied article. Never invent missing metadata. Keep summaries calm, specific, and useful for later retrieval. Topic labels must be lowercase. Limits: at most 8 key claims, 6 topics, 15 entities, 10 warnings; the summary is 2-4 tight sentences and stays under 500 characters — the key claims carry the detail, not the summary.",
+    user: `Title: ${input.title}\nURL: ${input.url}\nExtraction warnings: ${input.extractionWarnings.join(", ") || "none"}${videoNote}\n\nArticle:\n${input.text.slice(0, 50_000)}`,
   });
 
   return { enrichment: normalizeEnrichment(data), model };

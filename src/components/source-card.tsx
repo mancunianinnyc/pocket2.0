@@ -163,18 +163,28 @@ function ArticleCard({ source }: { source: LibrarySource }) {
     >
       {/* Mobile: compact row */}
       <div className="flex items-start gap-3 p-3 pr-11 sm:hidden">
-        <span
-          className="flex size-[74px] shrink-0 items-center justify-center rounded-xl"
-          style={{ background: gradient.bg, color: gradient.fg }}
-        >
-          <SiteIcon
-            src={source.favicon_url}
-            domain={sourceDomain}
-            mark={mark}
-            color={gradient.fg}
-            size={34}
+        {source.thumbnail_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={source.thumbnail_url}
+            alt=""
+            loading="lazy"
+            className="size-[74px] shrink-0 rounded-xl object-cover"
           />
-        </span>
+        ) : (
+          <span
+            className="flex size-[74px] shrink-0 items-center justify-center rounded-xl"
+            style={{ background: gradient.bg, color: gradient.fg }}
+          >
+            <SiteIcon
+              src={source.favicon_url}
+              domain={sourceDomain}
+              mark={mark}
+              color={gradient.fg}
+              size={34}
+            />
+          </span>
+        )}
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-1.5 text-[11px] font-semibold text-ink/62">
             <span
@@ -203,13 +213,23 @@ function ArticleCard({ source }: { source: LibrarySource }) {
           className="relative flex aspect-[16/9] items-end p-3.5"
           style={{ background: gradient.bg, color: gradient.fg }}
         >
-          <SiteIcon
-            src={source.favicon_url}
-            domain={sourceDomain}
-            mark={mark}
-            color={gradient.fg}
-            size={44}
-          />
+          {source.thumbnail_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={source.thumbnail_url}
+              alt=""
+              loading="lazy"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          ) : (
+            <SiteIcon
+              src={source.favicon_url}
+              domain={sourceDomain}
+              mark={mark}
+              color={gradient.fg}
+              size={44}
+            />
+          )}
           <span className="absolute right-3 top-3">
             <SourceStatusBadge status={source.status} />
           </span>

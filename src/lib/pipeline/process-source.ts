@@ -5,6 +5,7 @@ import { chunkText } from "./chunk";
 import { embedTexts } from "./embed";
 import { enrichArticle } from "./enrich";
 import { extractUrl } from "./extract";
+import { extractYouTube, getYouTubeVideoId } from "./youtube";
 
 function safeErrorMessage(error: unknown) {
   const message =
@@ -35,7 +36,10 @@ export async function processSource(sourceId: string, userId: string) {
     .eq("user_id", userId);
 
   try {
-    const extracted = await extractUrl(source.canonical_url);
+    const videoId = getYouTubeVideoId(source.canonical_url);
+    const extracted = videoId
+      ? await extractYouTube(videoId)
+      : await extractUrl(source.canonical_url);
     const chunks = chunkText(extracted.text);
     if (!chunks.length) throw new Error("The article could not be chunked.");
 
@@ -45,6 +49,7 @@ export async function processSource(sourceId: string, userId: string) {
         url: extracted.canonicalUrl,
         text: extracted.text,
         extractionWarnings: extracted.warnings,
+        kind: videoId ? "video" : "article",
       }),
       embedTexts(chunks.map((chunk) => chunk.text)),
     ]);
@@ -76,6 +81,9 @@ export async function processSource(sourceId: string, userId: string) {
     const warnings = Array.from(
       new Set([...extracted.warnings, ...enrichment.warnings]),
     );
+    // A video's watch time beats the model's estimate from its description.
+    const durationMinutes =
+      "durationMinutes" in extracted ? extracted.durationMinutes : null;
     const { error: metadataError } = await admin.from("source_metadata").upsert(
       {
         source_id: sourceId,
@@ -85,7 +93,7 @@ export async function processSource(sourceId: string, userId: string) {
         topics: enrichment.topics.map((topic) => topic.toLowerCase()),
         entities: enrichment.entities,
         content_type: enrichment.content_type,
-        reading_time_minutes: enrichment.reading_time_minutes,
+        reading_time_minutes: durationMinutes ?? enrichment.reading_time_minutes,
         warnings,
         model_name: model,
       },
@@ -99,6 +107,7 @@ export async function processSource(sourceId: string, userId: string) {
         title: extracted.title,
         canonical_url: extracted.canonicalUrl,
         favicon_url: extracted.faviconUrl,
+        thumbnail_url: "thumbnailUrl" in extracted ? extracted.thumbnailUrl : null,
         extracted_text: extracted.text,
         author: extracted.byline,
         published_at: extracted.publishedAt,

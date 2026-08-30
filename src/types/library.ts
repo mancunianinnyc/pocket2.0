@@ -30,6 +30,8 @@ export type LibrarySource = {
   starred_at: string | null;
   public_blurb: string | null;
   favicon_url: string | null;
+  /** Poster image for video sources (e.g. the YouTube thumbnail). */
+  thumbnail_url: string | null;
   source_metadata: SourceMetadata | SourceMetadata[] | null;
 };
 

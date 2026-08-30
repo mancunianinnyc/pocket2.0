@@ -21,6 +21,16 @@ import {
   type LibrarySource,
 } from "@/types/library";
 
+/**
+ * The aside should orient, not re-tell the piece — older saves carry summaries
+ * up to 1,200 characters, which overwhelms the article they sit beside.
+ */
+function brief(text: string) {
+  const sentences = text.match(/[^.!?]+[.!?]+["')\]]*\s*/g);
+  const cut = sentences ? sentences.slice(0, 2).join("").trim() : text;
+  return cut.length > 320 ? `${cut.slice(0, 320).trimEnd()}…` : cut;
+}
+
 export default async function ReaderPage({
   params,
 }: {
@@ -36,7 +46,7 @@ export default async function ReaderPage({
   const { data } = await supabase
     .from("sources")
     .select(
-      "id, source_type, title, canonical_url, extracted_text, author, published_at, saved_at, status, processing_error, why_saved, starred_at, public_blurb, favicon_url, source_metadata(summary, key_claims, topics, entities, content_type, reading_time_minutes, warnings, model_name)",
+      "id, source_type, title, canonical_url, extracted_text, author, published_at, saved_at, status, processing_error, why_saved, starred_at, public_blurb, favicon_url, thumbnail_url, source_metadata(summary, key_claims, topics, entities, content_type, reading_time_minutes, warnings, model_name)",
     )
     .eq("id", id)
     .eq("user_id", userId)
@@ -121,6 +131,16 @@ export default async function ReaderPage({
             </div>
           ) : null}
 
+          {source.thumbnail_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={source.thumbnail_url}
+              alt=""
+              loading="lazy"
+              className="mt-7 w-full rounded-2xl object-cover"
+            />
+          ) : null}
+
           {/* Mobile keeps the summary within thumb's reach — the aside lands
               below the whole article on small screens. Desktop uses the aside. */}
           {metadata?.summary ? (
@@ -134,7 +154,7 @@ export default async function ReaderPage({
                 />
               </summary>
               <p className="px-4 pb-4 text-sm leading-6 text-ink/80">
-                {metadata.summary}
+                {brief(metadata.summary)}
               </p>
             </details>
           ) : null}
@@ -172,7 +192,7 @@ export default async function ReaderPage({
                 In brief
               </p>
               <p className="mt-2 text-sm leading-6 text-ink/80">
-                {metadata.summary}
+                {brief(metadata.summary)}
               </p>
             </section>
           ) : null}
