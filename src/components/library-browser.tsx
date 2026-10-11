@@ -3,24 +3,32 @@
 import { ArrowUp, Search, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { firstMetadata, type LibrarySource } from "@/types/library";
-import { SourceCard } from "./source-card";
+import { Resurface } from "./resurface";
+import { domain, SourceRow } from "./source-card";
 
-type StatusFilter = "all" | "starred" | "ready" | "processing" | "failed";
+type Filter = "all" | "starred" | "media" | "posts" | "working" | "failed";
 
-const STATUS_FILTERS: Array<{ value: StatusFilter; label: string }> = [
-  { value: "all", label: "All" },
-  { value: "starred", label: "★ Featured" },
-  { value: "ready", label: "Ready" },
-  { value: "processing", label: "Working" },
-  { value: "failed", label: "Failed" },
-];
+const MEDIA_HOSTS = ["youtube.com", "youtu.be", "open.spotify.com", "spotify.com"];
+const POST_HOSTS = ["x.com", "twitter.com"];
 
-function domain(url: string | null) {
-  if (!url) return "";
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return "";
+function hostOf(source: LibrarySource) {
+  return domain(source.canonical_url).replace(/^m\./, "");
+}
+
+function matchesFilter(source: LibrarySource, filter: Filter) {
+  switch (filter) {
+    case "all":
+      return true;
+    case "starred":
+      return Boolean(source.starred_at);
+    case "media":
+      return MEDIA_HOSTS.includes(hostOf(source));
+    case "posts":
+      return POST_HOSTS.includes(hostOf(source));
+    case "working":
+      return source.status === "queued" || source.status === "processing";
+    case "failed":
+      return source.status === "failed";
   }
 }
 
@@ -42,10 +50,26 @@ function haystack(source: LibrarySource) {
     .toLowerCase();
 }
 
-export function LibraryBrowser({ sources }: { sources: LibrarySource[] }) {
+/** "October", or "October 2025" once it's not this year. */
+function monthLabel(iso: string) {
+  const date = new Date(iso);
+  const sameYear = date.getFullYear() === new Date().getFullYear();
+  return new Intl.DateTimeFormat("en", {
+    month: "long",
+    ...(sameYear ? {} : { year: "numeric" }),
+  }).format(date);
+}
+
+export function LibraryBrowser({
+  sources,
+  resurface,
+}: {
+  sources: LibrarySource[];
+  /** Shuffled ids for "From your library", picked on the server. */
+  resurface: string[];
+}) {
   const [query, setQuery] = useState("");
-  const [status, setStatus] = useState<StatusFilter>("all");
-  const [topic, setTopic] = useState<string | null>(null);
+  const [filter, setFilter] = useState<Filter>("all");
   const [showTop, setShowTop] = useState(false);
 
   useEffect(() => {
@@ -55,181 +79,164 @@ export function LibraryBrowser({ sources }: { sources: LibrarySource[] }) {
   }, []);
 
   const indexed = useMemo(
-    () =>
-      sources.map((source) => ({
-        source,
-        text: haystack(source),
-        topics: firstMetadata(source)?.topics ?? [],
-      })),
+    () => sources.map((source) => ({ source, text: haystack(source) })),
     [sources],
   );
 
-  /** Topics worth a chip: shared by more than one source, most common first. */
-  const topTopics = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const entry of indexed) {
-      for (const value of entry.topics) {
-        counts.set(value, (counts.get(value) ?? 0) + 1);
-      }
+  /* Working and Failed only appear while there is something in them. */
+  const tabs = useMemo(() => {
+    const options: Array<{ value: Filter; label: string }> = [
+      { value: "all", label: "All" },
+      { value: "starred", label: "Featured" },
+      { value: "media", label: "Video & audio" },
+      { value: "posts", label: "Posts" },
+    ];
+    if (sources.some((s) => matchesFilter(s, "working"))) {
+      options.push({ value: "working", label: "Reading now" });
     }
-    return [...counts.entries()]
-      .filter(([, count]) => count > 1)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 8)
-      .map(([value]) => value);
-  }, [indexed]);
+    if (sources.some((s) => matchesFilter(s, "failed"))) {
+      options.push({ value: "failed", label: "Couldn’t read" });
+    }
+    return options;
+  }, [sources]);
 
   const results = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return indexed
-      .filter((entry) => {
-        if (needle && !entry.text.includes(needle)) return false;
-        if (topic && !entry.topics.includes(topic)) return false;
-        if (status === "all") return true;
-        if (status === "starred") return Boolean(entry.source.starred_at);
-        if (status === "processing") {
-          return (
-            entry.source.status === "processing" ||
-            entry.source.status === "queued"
-          );
-        }
-        return entry.source.status === status;
-      })
+      .filter(
+        (entry) =>
+          (!needle || entry.text.includes(needle)) &&
+          matchesFilter(entry.source, filter),
+      )
       .map((entry) => entry.source);
-  }, [indexed, query, status, topic]);
+  }, [indexed, query, filter]);
 
-  const filtered =
-    query.trim().length > 0 || topic !== null || status !== "all";
+  /** Results are already newest-first, so months come out in order. */
+  const groups = useMemo(() => {
+    const byMonth: Array<{ label: string; items: LibrarySource[] }> = [];
+    for (const source of results) {
+      const label = monthLabel(source.saved_at);
+      const last = byMonth.at(-1);
+      if (last?.label === label) last.items.push(source);
+      else byMonth.push({ label, items: [source] });
+    }
+    return byMonth;
+  }, [results]);
+
+  const filtered = query.trim().length > 0 || filter !== "all";
 
   function clearAll() {
     setQuery("");
-    setStatus("all");
-    setTopic(null);
+    setFilter("all");
   }
 
   return (
-    <div>
-      <div className="sticky top-16 z-30 -mx-4 mb-5 border-b border-ink/8 bg-paper/92 px-4 pb-2.5 pt-2.5 backdrop-blur-xl sm:-mx-6 sm:px-6">
-        <div className="flex items-center gap-2 rounded-2xl border-[1.5px] border-ink/14 bg-white px-3 shadow-sm transition focus-within:border-moss focus-within:shadow-[0_0_0_3px_rgba(217,244,92,0.6)]">
-          <Search className="shrink-0 text-moss" size={18} aria-hidden />
-          <label className="sr-only" htmlFor="library-filter">
-            Filter your library
-          </label>
-          <input
-            id="library-filter"
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Filter by title, topic, or site…"
-            className="h-11 min-w-0 flex-1 bg-transparent text-[16px] outline-none placeholder:text-ink/55 [&::-webkit-search-cancel-button]:hidden"
-          />
-          {query ? (
-            <button
-              type="button"
-              onClick={() => setQuery("")}
-              aria-label="Clear filter text"
-              className="-mr-1.5 flex size-11 shrink-0 items-center justify-center rounded-lg text-ink/62 hover:text-ink"
+    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_15.5rem] lg:gap-20">
+      {/* grid-cols-1 is load-bearing: without an explicit minmax(0,1fr)
+          track the single column sizes to content and overflows on a phone. */}
+      <aside className="lg:col-start-2 lg:row-start-1 lg:pt-16">
+        <div className="lg:sticky lg:top-28">
+          <Resurface sources={sources} order={resurface} />
+        </div>
+      </aside>
+
+      <div className="min-w-0 lg:col-start-1 lg:row-start-1">
+        <div className="sticky top-16 z-30 -mx-4 bg-paper/95 px-4 pt-2 backdrop-blur-xl sm:-mx-6 sm:px-6">
+          <div className="flex flex-wrap items-end gap-x-6 border-b border-rule">
+            <div
+              role="group"
+              aria-label="Show"
+              className="-mb-px flex min-w-0 max-w-full gap-6 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
-              <X size={18} />
-            </button>
-          ) : null}
+              {tabs.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setFilter(option.value)}
+                  aria-pressed={filter === option.value}
+                  className={`h-11 shrink-0 border-b-2 text-sm transition ${
+                    filter === option.value
+                      ? "border-ink font-semibold text-ink"
+                      : "border-transparent text-ink/62 hover:text-ink"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+
+            <label className="mb-1 flex w-full items-center gap-2 text-ink/62 xl:ml-auto xl:w-56">
+              <Search size={16} className="shrink-0" aria-hidden />
+              <span className="sr-only">Filter your library</span>
+              <input
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Filter by title, site, topic…"
+                className="h-10 min-w-0 flex-1 bg-transparent text-[16px] text-ink outline-none placeholder:text-ink/55 sm:text-sm [&::-webkit-search-cancel-button]:hidden"
+              />
+              {query ? (
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  aria-label="Clear filter text"
+                  className="-mr-2 flex size-10 shrink-0 items-center justify-center hover:text-ink"
+                >
+                  <X size={16} />
+                </button>
+              ) : null}
+            </label>
+          </div>
         </div>
 
-        <div
-          role="group"
-          aria-label="Filter by status and topic"
-          className="mt-2 flex gap-1.5 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {STATUS_FILTERS.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => setStatus(option.value)}
-              aria-pressed={status === option.value}
-              className={`h-11 shrink-0 rounded-full px-4 text-[13px] font-semibold transition ${
-                status === option.value
-                  ? "bg-ink text-lime"
-                  : "bg-white/70 text-ink/70 hover:text-ink"
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-
-          {topTopics.length ? (
-            <span
-              aria-hidden
-              className="mx-1 h-11 w-px shrink-0 self-center bg-ink/12"
-            />
-          ) : null}
-
-          {topTopics.map((value) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setTopic(topic === value ? null : value)}
-              aria-pressed={topic === value}
-              className={`h-11 shrink-0 rounded-full px-4 text-[13px] font-medium transition ${
-                topic === value
-                  ? "bg-moss text-white"
-                  : "bg-cream text-ink/75 hover:text-ink"
-              }`}
-            >
-              {value}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="mb-4 flex items-end justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink/62">
-            {filtered ? "Matching" : "Recently saved"}
-          </p>
-          <p aria-live="polite" className="mt-1 text-sm text-ink/70">
-            {results.length} {results.length === 1 ? "item" : "items"}
-            {filtered ? ` of ${sources.length}` : ""}
-          </p>
-        </div>
         {filtered ? (
-          <button
-            type="button"
-            onClick={clearAll}
-            className="h-11 rounded-lg px-3 text-[13px] font-semibold text-moss hover:bg-cream"
-          >
-            Clear filters
-          </button>
+          <div className="flex items-center justify-between gap-3 pt-5">
+            <p aria-live="polite" className="text-sm text-ink/70">
+              {results.length} of {sources.length}
+            </p>
+            <button
+              type="button"
+              onClick={clearAll}
+              className="h-11 text-sm font-medium text-moss hover:text-ink"
+            >
+              Clear
+            </button>
+          </div>
         ) : null}
-      </div>
 
-      {results.length ? (
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-4">
-          {/* grid-cols-1 is load-bearing: without an explicit minmax(0,1fr)
-              track the single column sizes to content, and cards overflow the
-              container on a phone. */}
-          {results.map((source) => (
-            <SourceCard key={source.id} source={source} />
-          ))}
-        </div>
-      ) : (
-        <div className="rounded-[1.6rem] border border-dashed border-ink/15 bg-white/45 px-6 py-12 text-center">
-          <p className="text-sm text-ink/70">Nothing matches those filters.</p>
-          <button
-            type="button"
-            onClick={clearAll}
-            className="mt-3 h-11 rounded-lg px-3 text-[13px] font-semibold text-moss hover:bg-cream"
-          >
-            Clear filters
-          </button>
-        </div>
-      )}
+        {groups.length ? (
+          groups.map((group) => (
+            <section key={group.label} aria-label={group.label}>
+              <h2 className="pb-1 pt-8 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink/62">
+                {group.label}
+              </h2>
+              {group.items.map((source) => (
+                <SourceRow key={source.id} source={source} />
+              ))}
+            </section>
+          ))
+        ) : (
+          <div className="py-16 text-center">
+            <p className="font-serif text-xl italic text-ink/70">
+              Nothing matches that.
+            </p>
+            <button
+              type="button"
+              onClick={clearAll}
+              className="mt-2 h-11 text-sm font-medium text-moss hover:text-ink"
+            >
+              Clear filters
+            </button>
+          </div>
+        )}
+      </div>
 
       {showTop ? (
         <button
           type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           aria-label="Back to top"
-          className="fixed bottom-24 right-4 z-30 flex size-11 items-center justify-center rounded-full border border-ink/10 bg-white text-ink/70 shadow-[0_10px_30px_rgba(14,32,24,0.16)] hover:text-moss md:bottom-8"
+          className="fixed bottom-24 right-4 z-30 flex size-11 items-center justify-center rounded-full border border-rule bg-paper text-ink/70 shadow-[0_6px_20px_rgba(14,32,24,0.12)] hover:text-moss md:bottom-8"
         >
           <ArrowUp size={19} />
         </button>

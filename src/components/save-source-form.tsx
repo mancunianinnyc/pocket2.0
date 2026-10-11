@@ -67,9 +67,10 @@ export function SaveSourceForm({
 
   return (
     <form onSubmit={submit}>
-      <div className="flex flex-col gap-3 rounded-[1.4rem] border-[1.5px] border-ink/14 bg-white p-2 shadow-[0_20px_55px_rgba(14,32,24,0.12)] transition focus-within:border-moss focus-within:shadow-[0_0_0_3px_rgba(217,244,92,0.6),0_20px_55px_rgba(14,32,24,0.12)] sm:flex-row">
-        <label className="flex min-w-0 flex-1 items-center gap-3 px-3">
-          <Link2 className="shrink-0 text-moss" size={19} />
+      {/* One hairline, not a box: the field reads as part of the page. */}
+      <div className="flex items-center gap-2 border-b-[1.5px] border-ink/25 transition focus-within:border-moss">
+        <label className="flex min-w-0 flex-1 items-center gap-3">
+          <Link2 className="shrink-0 text-ink/62" size={18} />
           <span className="sr-only">URL to save</span>
           <input
             type="url"
@@ -83,26 +84,22 @@ export function SaveSourceForm({
         <button
           type="submit"
           disabled={saving}
-          className="flex h-12 items-center justify-center gap-2 rounded-[14px] bg-ink px-5 font-semibold text-lime transition hover:bg-moss active:scale-[0.98] disabled:cursor-wait disabled:opacity-75"
+          className="flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-full bg-ink px-4 text-sm font-semibold text-lime transition hover:bg-moss active:scale-[0.98] disabled:cursor-wait disabled:opacity-75"
         >
           {saving ? (
             <>
-              <LoaderCircle className="animate-spin" size={18} />
+              <LoaderCircle className="animate-spin" size={16} />
               Saving…
             </>
           ) : (
             <>
               Save
-              <ArrowRight size={18} />
+              <ArrowRight size={16} />
             </>
           )}
         </button>
       </div>
-      {error ? (
-        <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {error}
-        </p>
-      ) : null}
+      {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
     </form>
   );
 }

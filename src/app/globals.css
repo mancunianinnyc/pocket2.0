@@ -1,24 +1,32 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
+  /* Editorial calm (2026-10): a serif to read in, a plain sans for the
+     interface. Instrument Sans + Newsreader are loaded in app/layout.tsx. */
+  --font-sans: var(--font-ui-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-reading-serif), ui-serif, Georgia, serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   /* Pine & Chartreuse palette (2026-07 rebrand). Legacy token names kept so
-     existing utility classes keep working: moss=forest, sage=lime, cream=lime-soft. */
+     existing utility classes keep working: moss=forest, sage=lime, cream=lime-soft.
+     Chartreuse is an accent only — small signals, never large panels. */
   --color-ink: #0e2018;
   --color-moss: #14573f;
   --color-moss-dark: #0d3d2c;
   --color-sage: #d9f45c;
   --color-lime: #d9f45c;
-  --color-paper: #f5f0e1;
+  --color-paper: #f6f3ea;
   --color-cream: #ecf4c4;
   --color-clay: #e8542f;
   --color-amber-brand: #f0b03f;
+  /* Hairlines do the work boxes used to: dividers between rows and sections. */
+  --color-rule: #e2ddd0;
+  /* The highlight wash behind marked text. */
+  --color-mark: #e6f7a0;
 }
 
 :root {
   color-scheme: light;
-  --background: #f5f0e1;
+  --background: #f6f3ea;
   --foreground: #0e2018;
 }
 
@@ -33,12 +41,11 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
-  background:
-    radial-gradient(circle at 15% 0%, rgb(217 244 92 / 0.28), transparent 30rem),
-    var(--background);
+  background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-ui-sans), ui-sans-serif, system-ui, sans-serif;
   text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 button,
@@ -50,15 +57,6 @@ textarea {
 button,
 a {
   -webkit-tap-highlight-color: transparent;
-}
-
-/* Collapsible "In brief" on the reader page: flip the chevron when open. */
-.details-chevron {
-  transition: transform 150ms ease;
-}
-
-details[open] > summary .details-chevron {
-  transform: rotate(180deg);
 }
 
 ::selection {

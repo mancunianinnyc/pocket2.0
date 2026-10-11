@@ -1,6 +1,6 @@
 # Good Content — where things stand and what's next
 
-**Updated:** 2026-10-11 · **Version:** v0.7.0 (+ Pocket-archive recovery)
+**Updated:** 2026-10-11 · **Version:** v0.9.0
 
 The single doc to read when picking this up. `BUILD_PLAN.md` holds the settled
 architectural decisions (don't relitigate them); `AGENTS.md` holds the security
@@ -67,6 +67,10 @@ Beyond the plan: starring publishes to the public reading page, the PWA captures
 in the background so a save survives closing the app, extraction fails loudly
 on network block pages, YouTube/Spotify/Dropbox-PDF links save (v0.6–0.7), and
 29 articles were recovered from the 2014–2018 Favourite Pocket archive.
+v0.9.0 (2026-10-11) is the **"editorial calm" redesign**, chosen from two
+mocked directions: Newsreader serif for titles and reading, Instrument Sans for
+the interface, plain paper with hairlines instead of boxed cards, chartreuse as
+a small accent only. Topic chips are gone from the library (see item 3).
 
 ---
 
@@ -91,7 +95,8 @@ library: median pair 0.30, p90 0.49) keeps weak matches out — showing nothing
 beats showing noise. Because the reader refreshes itself while processing, a
 fresh save lands on its connections the moment it's ready.
 
-**2. Resurfacing: shuffle + weekly "from your library".** A random-item button
+**2. Resurfacing: shuffle + weekly "from your library".** *(Shuffle shipped in
+v0.9.0 as the "From your library" panel; the weekly message is still to do.)* A random-item button
 on the library page, and a weekly message with one older save, its brief, and
 its top two connections (reuses item 1). Delivery to Ross's Slack self-DM fits
 the existing daily-plan habit better than email; this replaces the old "digest

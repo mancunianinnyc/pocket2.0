@@ -4,7 +4,6 @@ import {
   type LibrarySource,
 } from "@/types/library";
 import { SiteIcon } from "./site-icon";
-import { SourceStatusBadge } from "./source-status";
 import { StarButton } from "./star-button";
 
 export function domain(url: string | null) {
@@ -32,17 +31,11 @@ function gist(text: string | null | undefined) {
   return text.match(/^[\s\S]*?[.!?](?=\s|$)/)?.[0] ?? text;
 }
 
-const GRADIENTS = [
-  { bg: "linear-gradient(135deg,#14573f,#0e2018)", fg: "#d9f45c" },
-  { bg: "linear-gradient(160deg,#f0b03f,#e8542f)", fg: "#ffffff" },
-  { bg: "linear-gradient(135deg,#d9f45c,#14573f)", fg: "#0e2018" },
-  { bg: "linear-gradient(135deg,#0e2018,#2a6b50)", fg: "#d9f45c" },
-];
+/** Monogram colour for sites whose favicon can't be reached. */
+export const MONOGRAM_COLOR = "#14573f";
 
-export function gradientFor(seed: string) {
-  let hash = 0;
-  for (const char of seed) hash = (hash * 31 + char.charCodeAt(0)) % 997;
-  return GRADIENTS[hash % GRADIENTS.length];
+export function monogram(sourceDomain: string) {
+  return sourceDomain.split(".")[0].slice(0, 2);
 }
 
 function savedDate(source: LibrarySource) {
@@ -52,10 +45,10 @@ function savedDate(source: LibrarySource) {
   }).format(new Date(source.saved_at));
 }
 
-/** "site.com · Jul 12 · 8 min" — the card's quiet top line. */
+/** "site.com · Author · 8 min" — the row's quiet top line. */
 function metaLine(source: LibrarySource, lead: string) {
   const minutes = firstMetadata(source)?.reading_time_minutes;
-  return [lead, savedDate(source), minutes ? `${minutes} min` : null]
+  return [lead, source.author, minutes ? `${minutes} min` : savedDate(source)]
     .filter(Boolean)
     .join(" · ");
 }
@@ -69,212 +62,93 @@ function tweetParts(source: LibrarySource) {
     separator > -1 && /^Tweet by /.test(body)
       ? body.slice(separator + 2)
       : body || source.title || "";
-  return { handle, name: source.author || handle, text };
+  return { handle, text };
 }
 
-function TweetCard({ source }: { source: LibrarySource }) {
-  const metadata = firstMetadata(source);
-  const topics = metadata?.topics?.slice(0, 2) ?? [];
-  const { handle, name, text } = tweetParts(source);
-  const gradient = gradientFor(handle);
-
-  return (
-    <Link
-      href={`/library/${source.id}`}
-      className="group block rounded-[20px] border border-ink/10 bg-white transition hover:-translate-y-0.5 hover:border-moss/40 hover:shadow-[0_20px_50px_rgba(14,32,24,0.14)]"
-    >
-      {/* Mobile: compact row */}
-      <div className="flex items-start gap-3 p-3 pr-11 sm:hidden">
-        <span
-          className="flex size-[74px] shrink-0 items-center justify-center rounded-xl text-xl font-bold"
-          style={{ background: gradient.bg, color: gradient.fg }}
-        >
-          𝕏
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-ink/62">
-            <span className="size-1.5 shrink-0 rounded-full bg-moss" />
-            <span className="truncate">{metaLine(source, handle)}</span>
-          </span>
-          <span className="mt-1 line-clamp-2 text-[15px] font-semibold leading-snug tracking-[-0.015em] text-ink">
-            {text}
-          </span>
-          <span className="mt-1 line-clamp-2 text-xs leading-5 text-ink/70">
-            {gist(metadata?.summary) || name}
-          </span>
-        </span>
-      </div>
-
-      {/* Desktop: tweet card */}
-      <div className="hidden h-full flex-col gap-3 p-4 sm:flex">
-        <div className="flex items-center gap-2.5">
-          <span
-            className="flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-bold"
-            style={{ background: gradient.bg, color: gradient.fg }}
-          >
-            {(name || handle).replace("@", "").charAt(0).toUpperCase()}
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block truncate text-[13px] font-semibold tracking-[-0.01em]">
-              {name}
-            </span>
-            <span className="block truncate text-[11.5px] text-ink/62">
-              {metaLine(source, handle)}
-            </span>
-          </span>
-          <span className="text-sm font-bold text-ink/30">𝕏</span>
-        </div>
-        <p className="line-clamp-5 whitespace-pre-line text-[13.5px] leading-relaxed text-ink/85">
-          {text}
-        </p>
-        {topics.length ? (
-          <div className="mt-auto flex flex-wrap gap-1.5 pt-1">
-            {topics.map((topic) => (
-              <span
-                key={topic}
-                className="rounded-full bg-cream px-2.5 py-1 text-[10.5px] font-semibold text-ink/75"
-              >
-                {topic}
-              </span>
-            ))}
-          </div>
-        ) : null}
-      </div>
-    </Link>
-  );
+/** Processing and failure read as words in the meta line, not as badges. */
+function StatusNote({ source }: { source: LibrarySource }) {
+  if (source.status === "failed") {
+    return <span className="text-red-700"> · couldn’t read this</span>;
+  }
+  if (source.status === "queued" || source.status === "processing") {
+    return <span className="text-moss"> · reading…</span>;
+  }
+  return null;
 }
 
-function ArticleCard({ source }: { source: LibrarySource }) {
+/**
+ * A library row in the editorial style: meta line, serif title, one-line
+ * gist, and the poster image on the right when the source has one. Rows are
+ * separated by hairlines rather than boxed as cards.
+ */
+export function SourceRow({ source }: { source: LibrarySource }) {
   const metadata = firstMetadata(source);
-  const topics = metadata?.topics?.slice(0, 2) ?? [];
   const sourceDomain = domain(source.canonical_url);
-  const gradient = gradientFor(sourceDomain);
-  const mark = sourceDomain.split(".")[0].slice(0, 2);
+  const tweet = isTweet(source.canonical_url);
+  const { handle, text } = tweet ? tweetParts(source) : { handle: "", text: "" };
   const summary =
-    metadata?.summary ||
-    (source.status === "failed"
+    source.status === "failed"
       ? source.processing_error
-      : "We’re extracting the useful part now.");
+      : metadata?.summary;
 
   return (
-    <Link
-      href={`/library/${source.id}`}
-      className="group block overflow-hidden rounded-[20px] border border-ink/10 bg-white transition hover:-translate-y-0.5 hover:border-moss/40 hover:shadow-[0_20px_50px_rgba(14,32,24,0.14)]"
-    >
-      {/* Mobile: compact row */}
-      <div className="flex items-start gap-3 p-3 pr-11 sm:hidden">
+    /* The star sits outside the row link — a button nested in an anchor is
+       invalid, and triage shouldn't navigate. */
+    <div className="group relative border-b border-rule">
+      <Link
+        href={`/library/${source.id}`}
+        className="flex gap-5 py-5 pr-12 sm:gap-7 sm:py-6"
+      >
+        <div className="min-w-0 flex-1">
+          <p className="flex items-center gap-2 text-[12.5px] text-ink/62">
+            <span className="flex size-4 shrink-0 items-center justify-center">
+              {tweet ? (
+                <span aria-hidden className="text-[13px] font-bold text-ink/70">
+                  𝕏
+                </span>
+              ) : (
+                <SiteIcon
+                  src={source.favicon_url}
+                  domain={sourceDomain}
+                  mark={monogram(sourceDomain)}
+                  color={MONOGRAM_COLOR}
+                  size={16}
+                />
+              )}
+            </span>
+            <span className="truncate">
+              {tweet ? `${handle} · ${savedDate(source)}` : metaLine(source, sourceDomain)}
+              <StatusNote source={source} />
+            </span>
+          </p>
+          {tweet ? (
+            <p className="mt-1.5 line-clamp-4 whitespace-pre-line font-serif text-[19px] leading-[1.4] text-ink group-hover:text-moss sm:text-[21px]">
+              {text}
+            </p>
+          ) : (
+            <>
+              <h2 className="mt-1.5 line-clamp-3 font-serif text-[21px] font-medium leading-[1.22] tracking-[-0.012em] text-ink group-hover:text-moss sm:text-[25px]">
+                {source.title || "Untitled source"}
+              </h2>
+              {summary ? (
+                <p className="mt-2 line-clamp-2 text-[14px] leading-relaxed text-ink/70 sm:text-[15px]">
+                  {gist(summary)}
+                </p>
+              ) : null}
+            </>
+          )}
+        </div>
         {source.thumbnail_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={source.thumbnail_url}
             alt=""
             loading="lazy"
-            className="size-[74px] shrink-0 rounded-xl object-cover"
+            className="mt-6 h-[68px] w-24 shrink-0 rounded-md object-cover sm:h-[88px] sm:w-32"
           />
-        ) : (
-          <span
-            className="flex size-[74px] shrink-0 items-center justify-center rounded-xl"
-            style={{ background: gradient.bg, color: gradient.fg }}
-          >
-            <SiteIcon
-              src={source.favicon_url}
-              domain={sourceDomain}
-              mark={mark}
-              color={gradient.fg}
-              size={34}
-            />
-          </span>
-        )}
-        <span className="min-w-0 flex-1">
-          <span className="flex items-center gap-1.5 text-[11px] font-semibold text-ink/62">
-            <span
-              className={`size-1.5 shrink-0 rounded-full ${
-                source.status === "ready"
-                  ? "bg-moss"
-                  : source.status === "failed"
-                    ? "bg-clay"
-                    : "bg-amber-brand"
-              }`}
-            />
-            <span className="truncate">{metaLine(source, sourceDomain)}</span>
-          </span>
-          <span className="mt-1 line-clamp-2 text-[15px] font-semibold leading-snug tracking-[-0.015em] text-ink group-hover:text-moss">
-            {source.title || "Untitled source"}
-          </span>
-          <span className="mt-1 line-clamp-3 text-xs leading-5 text-ink/70">
-            {gist(summary)}
-          </span>
-        </span>
-      </div>
-
-      {/* Desktop: preview card with thumb */}
-      <div className="hidden h-full flex-col sm:flex">
-        <div
-          className="relative flex aspect-[16/9] items-end p-3.5"
-          style={{ background: gradient.bg, color: gradient.fg }}
-        >
-          {source.thumbnail_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={source.thumbnail_url}
-              alt=""
-              loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-          ) : (
-            <SiteIcon
-              src={source.favicon_url}
-              domain={sourceDomain}
-              mark={mark}
-              color={gradient.fg}
-              size={44}
-            />
-          )}
-          <span className="absolute right-3 top-3">
-            <SourceStatusBadge status={source.status} />
-          </span>
-        </div>
-        <div className="flex flex-1 flex-col gap-1.5 px-4 pb-4 pt-3.5">
-          <p className="text-[11.5px] font-semibold text-ink/62">
-            {metaLine(source, sourceDomain)}
-          </p>
-          <h2 className="line-clamp-2 text-[16px] font-semibold leading-snug tracking-[-0.02em] text-ink group-hover:text-moss">
-            {source.title || "Untitled source"}
-          </h2>
-          <p className="line-clamp-2 text-[13px] leading-relaxed text-ink/70">
-            {gist(summary)}
-          </p>
-          {topics.length ? (
-            <div className="mt-auto flex flex-wrap gap-1.5 pt-1.5">
-              {topics.map((topic) => (
-                <span
-                  key={topic}
-                  className="rounded-full bg-cream px-2.5 py-1 text-[10.5px] font-semibold text-ink/75"
-                >
-                  {topic}
-                </span>
-              ))}
-            </div>
-          ) : null}
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-export function SourceCard({ source }: { source: LibrarySource }) {
-  return (
-    /* The star sits outside the card link — a button nested in an anchor is
-       invalid, and triage shouldn't navigate. */
-    <div className="group relative">
-      {isTweet(source.canonical_url) ? (
-        <TweetCard source={source} />
-      ) : (
-        <ArticleCard source={source} />
-      )}
-      {/* Right-centred on mobile rows; on desktop it moves to the thumbnail's
-          top-left so it never collides with the status badge. */}
-      <span className="absolute right-1 top-2 sm:right-auto sm:left-1 sm:top-1">
+        ) : null}
+      </Link>
+      <span className="absolute right-0 top-3.5 sm:top-4.5">
         <StarButton
           sourceId={source.id}
           starred={Boolean(source.starred_at)}

@@ -1,11 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Instrument_Sans, Newsreader } from "next/font/google";
 import { ServiceWorkerRegistration } from "@/components/service-worker-registration";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+/** Interface type: labels, buttons, meta lines. */
+const instrumentSans = Instrument_Sans({
+  variable: "--font-ui-sans",
   subsets: ["latin"],
+});
+
+/** Reading type: titles and article text. Optical sizing keeps it crisp from
+    13px captions to 64px headlines. */
+const newsreader = Newsreader({
+  variable: "--font-reading-serif",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  axes: ["opsz"],
 });
 
 const geistMono = Geist_Mono({
@@ -34,9 +44,9 @@ export const metadata: Metadata = {
   },
 };
 
-/** Parchment status bar, so the system chrome meets the app header cleanly. */
+/** Paper status bar, so the system chrome meets the app header cleanly. */
 export const viewport: Viewport = {
-  themeColor: "#f5f0e1",
+  themeColor: "#f6f3ea",
 };
 
 export default function RootLayout({
@@ -47,7 +57,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable}`}
+      className={`${instrumentSans.variable} ${newsreader.variable} ${geistMono.variable}`}
     >
       <body>
         {children}

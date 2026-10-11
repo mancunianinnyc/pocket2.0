@@ -52,13 +52,13 @@ export function SourceActions({
 
   return (
     <div>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-rule pt-4">
         {canRetry ? (
           <button
             type="button"
             onClick={retry}
             disabled={Boolean(busy)}
-            className="inline-flex h-11 items-center gap-2 rounded-xl bg-moss px-4 text-sm font-semibold text-white disabled:opacity-60"
+            className="inline-flex h-10 items-center gap-2 rounded-full bg-ink px-4 text-sm font-semibold text-lime hover:bg-moss disabled:opacity-60"
           >
             {busy === "retry" ? (
               <LoaderCircle className="animate-spin" size={16} />
@@ -72,7 +72,7 @@ export function SourceActions({
           type="button"
           onClick={remove}
           disabled={Boolean(busy)}
-          className="inline-flex h-10 items-center gap-2 rounded-xl border border-red-200 px-4 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60"
+          className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-red-700 hover:text-red-900 disabled:opacity-60"
         >
           {busy === "delete" ? (
             <LoaderCircle className="animate-spin" size={16} />

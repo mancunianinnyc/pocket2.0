@@ -52,8 +52,8 @@ export function SiteIcon({
       height={size}
       loading="lazy"
       onError={() => setAttempt((current) => current + 1)}
-      className="rounded-[5px] bg-white/95 object-contain p-[3px] shadow-[0_1px_4px_rgba(14,32,24,0.25)]"
-      style={{ width: size, height: size }}
+      className="rounded-[4px] bg-white/95 object-contain shadow-[0_1px_3px_rgba(14,32,24,0.22)]"
+      style={{ width: size, height: size, padding: size >= 24 ? 3 : 1 }}
     />
   );
 }
