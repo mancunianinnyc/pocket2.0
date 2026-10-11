@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRight, LoaderCircle, Send, Sparkles } from "lucide-react";
+import { LoaderCircle, Send } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import type { AskAnswer } from "@/types/search";
@@ -36,24 +36,32 @@ export function AskExperience() {
   return (
     <div>
       <form onSubmit={submit}>
-        <div className="rounded-[1.4rem] border-[1.5px] border-ink/14 bg-white p-2 shadow-sm transition focus-within:border-moss focus-within:shadow-[0_0_0_3px_rgba(217,244,92,0.6)]">
+        <div className="border-b-[1.5px] border-ink/25 transition focus-within:border-moss">
+          <label htmlFor="ask-question" className="sr-only">
+            Your question
+          </label>
           <textarea
+            id="ask-question"
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
             required
             minLength={3}
             rows={3}
             placeholder="What did I save about…"
-            className="w-full resize-none bg-transparent px-3 py-2 text-[17px] leading-7 outline-none placeholder:text-ink/55"
+            className="w-full resize-none bg-transparent py-2 font-serif text-[20px] leading-[1.5] outline-none placeholder:italic placeholder:text-ink/55"
           />
-          <div className="flex justify-end border-t border-ink/7 pt-2">
+          <div className="flex justify-end pb-3">
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex h-11 items-center gap-2 rounded-[14px] bg-ink px-4 text-sm font-semibold text-lime transition hover:bg-moss disabled:opacity-60"
+              className="inline-flex h-10 items-center gap-2 rounded-full bg-ink px-4 text-sm font-semibold text-lime transition hover:bg-moss disabled:opacity-60"
             >
-              {loading ? <LoaderCircle className="animate-spin" size={17} /> : <Send size={17} />}
-              Ask my library
+              {loading ? (
+                <LoaderCircle className="animate-spin" size={16} />
+              ) : (
+                <Send size={16} />
+              )}
+              {loading ? "Reading your library…" : "Ask"}
             </button>
           </div>
         </div>
@@ -62,46 +70,49 @@ export function AskExperience() {
       {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
 
       {answer ? (
-        <section className="mt-7 rounded-[1.5rem] border border-ink/8 bg-white/75 p-5 sm:p-7">
-          <div className="flex items-center gap-2 text-sm font-bold text-moss">
-            <span className="flex size-7 items-center justify-center rounded-lg bg-lime text-ink">
-              <Sparkles size={15} />
-            </span>
-            Answer from your library
-          </div>
+        <section className="mt-10" aria-label="Answer">
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-moss">
+            From your library
+          </h2>
           {answer.insufficient_evidence ? (
-            <p className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              The available evidence is incomplete, so treat this as a limited answer.
+            <p className="mt-4 border-l-[3px] border-amber-brand py-0.5 pl-4 text-sm leading-6 text-ink/75">
+              The evidence is incomplete, so treat this as a limited answer.
             </p>
           ) : null}
-          <p className="mt-5 whitespace-pre-wrap text-[17px] leading-8 text-ink/78">
+          <p className="mt-4 whitespace-pre-wrap font-serif text-[19px] leading-[1.7] text-ink/90 sm:text-[20px]">
             {answer.answer}
           </p>
 
           {answer.citations.length ? (
-            <div className="mt-7 border-t border-ink/8 pt-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink/62">
+            <div className="mt-10">
+              <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink/62">
                 Evidence
-              </p>
-              <div className="mt-3 grid gap-2">
+              </h3>
+              <ol className="mt-2">
                 {answer.citations.map((citation, index) => (
-                  <Link
+                  <li
                     key={`${citation.source_id}-${citation.chunk_index}-${index}`}
-                    href={`/library/${citation.source_id}`}
-                    className="group rounded-[14px] border-l-[3px] border-lime bg-cream/70 p-4"
+                    className="border-b border-rule"
                   >
-                    <div className="flex justify-between gap-4">
-                      <p className="text-xs font-semibold text-moss">
-                        {index + 1}. {citation.title || "Untitled source"}
-                      </p>
-                      <ArrowUpRight className="shrink-0 text-ink/25 group-hover:text-moss" size={16} />
-                    </div>
-                    <blockquote className="mt-2 text-sm leading-6 text-ink/62">
-                      “{citation.quote}”
-                    </blockquote>
-                  </Link>
+                    <Link
+                      href={`/library/${citation.source_id}`}
+                      className="group flex gap-4 py-4"
+                    >
+                      <span className="w-5 shrink-0 pt-0.5 font-serif text-[17px] text-moss">
+                        {index + 1}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block font-serif text-[18px] font-medium leading-[1.3] text-ink group-hover:text-moss">
+                          {citation.title || "Untitled source"}
+                        </span>
+                        <blockquote className="mt-1.5 font-serif text-[15px] italic leading-[1.55] text-ink/70">
+                          “{citation.quote}”
+                        </blockquote>
+                      </span>
+                    </Link>
+                  </li>
                 ))}
-              </div>
+              </ol>
             </div>
           ) : null}
         </section>

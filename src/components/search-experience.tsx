@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRight, LoaderCircle, Search } from "lucide-react";
+import { LoaderCircle, Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import type { SearchResult } from "@/types/search";
@@ -32,9 +32,12 @@ export function SearchExperience() {
 
   return (
     <div>
-      <form onSubmit={submit} className="flex rounded-2xl border-[1.5px] border-ink/14 bg-white p-2 shadow-sm transition focus-within:border-moss focus-within:shadow-[0_0_0_3px_rgba(217,244,92,0.6)]">
-        <label className="flex min-w-0 flex-1 items-center gap-3 px-3">
-          <Search className="shrink-0 text-moss" size={19} />
+      <form
+        onSubmit={submit}
+        className="flex items-center gap-2 border-b-[1.5px] border-ink/25 transition focus-within:border-moss"
+      >
+        <label className="flex min-w-0 flex-1 items-center gap-3">
+          <Search className="shrink-0 text-ink/62" size={18} />
           <span className="sr-only">Search your library</span>
           <input
             value={query}
@@ -48,37 +51,48 @@ export function SearchExperience() {
         <button
           type="submit"
           disabled={loading}
-          className="flex size-12 shrink-0 items-center justify-center rounded-[14px] bg-ink text-lime transition hover:bg-moss disabled:opacity-60 sm:w-auto sm:px-5"
+          aria-label="Search"
+          className="flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-full bg-ink px-4 text-sm font-semibold text-lime transition hover:bg-moss disabled:opacity-60"
         >
-          {loading ? <LoaderCircle className="animate-spin" size={18} /> : <span className="hidden font-semibold sm:block">Search</span>}
-          <Search className="sm:hidden" size={18} />
+          {loading ? (
+            <LoaderCircle className="animate-spin" size={16} />
+          ) : (
+            <Search size={16} />
+          )}
+          <span className="hidden sm:inline">Search</span>
         </button>
       </form>
 
       {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
 
-      <div className="mt-7 grid gap-3">
-        {results.map((result) => (
-          <Link
-            key={`${result.source_id}-${result.chunk_index}`}
-            href={`/library/${result.source_id}`}
-            className="group rounded-2xl border border-ink/8 bg-white/70 p-5 hover:border-moss/25 hover:bg-white"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-sm font-semibold text-ink">{result.title || "Untitled source"}</p>
-                <p className="mt-2 line-clamp-3 text-sm leading-6 text-ink/70">{result.chunk_text}</p>
-              </div>
-              <ArrowUpRight className="shrink-0 text-ink/25 group-hover:text-moss" size={18} />
-            </div>
-          </Link>
-        ))}
-        {searched && !loading && results.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-ink/15 p-8 text-center text-sm text-ink/70">
-            No matching passages yet.
-          </div>
-        ) : null}
-      </div>
+      {results.length ? (
+        <ol className="mt-6">
+          {results.map((result) => (
+            <li
+              key={`${result.source_id}-${result.chunk_index}`}
+              className="border-b border-rule"
+            >
+              <Link
+                href={`/library/${result.source_id}`}
+                className="group block py-5"
+              >
+                <span className="block font-serif text-[21px] font-medium leading-[1.25] tracking-[-0.01em] text-ink group-hover:text-moss">
+                  {result.title || "Untitled source"}
+                </span>
+                <span className="mt-2 line-clamp-3 block font-serif text-[16px] italic leading-[1.55] text-ink/70">
+                  {result.chunk_text}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ol>
+      ) : null}
+
+      {searched && !loading && results.length === 0 ? (
+        <p className="py-14 text-center font-serif text-xl italic text-ink/70">
+          No matching passages yet.
+        </p>
+      ) : null}
     </div>
   );
 }

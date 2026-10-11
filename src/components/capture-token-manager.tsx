@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Copy, KeyRound, LoaderCircle, X } from "lucide-react";
+import { Check, Copy, KeyRound, LoaderCircle } from "lucide-react";
 import { useState } from "react";
 
 type TokenRecord = {
@@ -77,18 +77,18 @@ export function CaptureTokenManager({
   return (
     <div>
       {newToken ? (
-        <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-          <p className="text-sm font-semibold text-amber-900">
-            Copy this token now. It will not be shown again.
+        <div className="mb-6 border-l-[3px] border-amber-brand py-1 pl-4">
+          <p className="text-sm font-semibold text-ink">
+            Copy this token now — it won’t be shown again.
           </p>
-          <div className="mt-3 flex gap-2">
-            <code className="min-w-0 flex-1 truncate rounded-lg bg-white px-3 py-2 font-mono text-xs text-ink">
+          <div className="mt-3 flex items-center gap-2">
+            <code className="min-w-0 flex-1 truncate border-b border-rule py-2 font-mono text-xs text-ink">
               {newToken}
             </code>
             <button
               type="button"
               onClick={copyToken}
-              className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-moss text-white"
+              className="flex size-11 shrink-0 items-center justify-center rounded-full bg-ink text-lime hover:bg-moss"
               aria-label="Copy token"
             >
               {copied ? <Check size={16} /> : <Copy size={16} />}
@@ -97,19 +97,26 @@ export function CaptureTokenManager({
         </div>
       ) : null}
 
-      <form onSubmit={createToken} className="flex flex-col gap-2 sm:flex-row">
+      <form
+        onSubmit={createToken}
+        className="flex items-center gap-2 border-b-[1.5px] border-ink/25 transition focus-within:border-moss"
+      >
+        <label htmlFor="token-label" className="sr-only">
+          Token label
+        </label>
         <input
+          id="token-label"
           value={label}
           onChange={(event) => setLabel(event.target.value)}
           maxLength={80}
           required
-          className="h-11 min-w-0 flex-1 rounded-xl border border-ink/12 bg-paper/55 px-3 text-[16px] outline-none focus:border-moss"
+          className="h-12 min-w-0 flex-1 bg-transparent text-[16px] outline-none"
           placeholder="Token label"
         />
         <button
           type="submit"
           disabled={busy}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-moss px-4 text-sm font-semibold text-white disabled:opacity-60"
+          className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-full bg-ink px-4 text-sm font-semibold text-lime hover:bg-moss disabled:opacity-60"
         >
           {busy ? <LoaderCircle className="animate-spin" size={16} /> : <KeyRound size={16} />}
           Create token
@@ -118,12 +125,17 @@ export function CaptureTokenManager({
 
       {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
 
-      <div className="mt-5 divide-y divide-ink/8">
+      <ul className="mt-2">
         {tokens.length ? (
           tokens.map((token) => (
-            <div key={token.id} className="flex items-center justify-between gap-4 py-3">
+            <li
+              key={token.id}
+              className="flex items-center justify-between gap-4 border-b border-rule py-3"
+            >
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">{token.label}</p>
+                <p className={`truncate text-sm font-semibold ${token.revoked_at ? "text-ink/62 line-through" : ""}`}>
+                  {token.label}
+                </p>
                 <p className="mt-0.5 text-xs text-ink/70">
                   {token.revoked_at
                     ? "Revoked"
@@ -136,18 +148,20 @@ export function CaptureTokenManager({
                 <button
                   type="button"
                   onClick={() => revokeToken(token.id)}
-                  className="flex size-11 shrink-0 items-center justify-center rounded-lg text-ink/62 hover:bg-red-50 hover:text-red-700"
+                  className="min-h-11 shrink-0 text-sm font-medium text-red-700 hover:text-red-900"
                   aria-label={`Revoke ${token.label}`}
                 >
-                  <X size={17} />
+                  Revoke
                 </button>
               ) : null}
-            </div>
+            </li>
           ))
         ) : (
-          <p className="py-5 text-sm text-ink/70">No capture tokens yet.</p>
+          <li className="py-4 font-serif text-[17px] italic text-ink/70">
+            No capture tokens yet.
+          </li>
         )}
-      </div>
+      </ul>
     </div>
   );
 }
