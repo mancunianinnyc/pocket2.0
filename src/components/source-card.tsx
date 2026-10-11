@@ -7,7 +7,7 @@ import { SiteIcon } from "./site-icon";
 import { SourceStatusBadge } from "./source-status";
 import { StarButton } from "./star-button";
 
-function domain(url: string | null) {
+export function domain(url: string | null) {
   if (!url) return "Note";
   try {
     return new URL(url).hostname.replace(/^www\./, "");
@@ -39,7 +39,7 @@ const GRADIENTS = [
   { bg: "linear-gradient(135deg,#0e2018,#2a6b50)", fg: "#d9f45c" },
 ];
 
-function gradientFor(seed: string) {
+export function gradientFor(seed: string) {
   let hash = 0;
   for (const char of seed) hash = (hash * 31 + char.charCodeAt(0)) % 997;
   return GRADIENTS[hash % GRADIENTS.length];

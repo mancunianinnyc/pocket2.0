@@ -1,6 +1,6 @@
 # Good Content — where things stand and what's next
 
-**Updated:** 2026-08-03 · **Version:** v0.5.0
+**Updated:** 2026-10-11 · **Version:** v0.7.0 (+ Pocket-archive recovery)
 
 The single doc to read when picking this up. `BUILD_PLAN.md` holds the settled
 architectural decisions (don't relitigate them); `AGENTS.md` holds the security
@@ -18,8 +18,13 @@ rules that survive every change.
 | Supabase | project `flbjlwckcgtlamnpabmj`, us-east-2 |
 | Model | `gpt-5.6-luna` via `src/lib/llm.ts`; embeddings still OpenAI `text-embedding-3-small` |
 
-**Library:** 90 sources — 78 ready, 12 failed (all paywall/bot-block), 5 starred,
-346 chunks, 60 with a resolved favicon.
+**Library (2026-10-11):** 145 sources — 130 ready, 15 failed, 6 starred.
+12 saves in the last 30 days, 0 in the last 7. **7 Ask queries ever. 0 notes,
+0 highlights, 0 projects, 0 capture tokens.**
+
+That last line is the diagnosis that shapes the plan below: getting things *in*
+works; getting value back *out* doesn't happen. The library is an archive that
+is written to and rarely read from.
 
 ---
 
@@ -59,39 +64,64 @@ acceptance criteria, these are closed:
 - Deployed, tagged, and in daily use
 
 Beyond the plan: starring publishes to the public reading page, the PWA captures
-in the background so a save survives closing the app, and extraction now fails
-loudly when a network block page is served instead of an article.
+in the background so a save survives closing the app, extraction fails loudly
+on network block pages, YouTube/Spotify/Dropbox-PDF links save (v0.6–0.7), and
+29 articles were recovered from the 2014–2018 Favourite Pocket archive.
 
 ---
 
 ## Next, in order
 
-**1. Notes.** The one Ross asked for. Schema already has `notes` (0 rows) with
-`note_type` of `personal_note` or `why_saved`. Needs: an editable note on the
-reader, an editable `why_saved`, and a place for them on the card. Worth doing
-before more capture features — it turns the library from an archive into
-something written in.
+The order below came out of a comparison with **Sublime** (sublime.app, "save
+one idea, discover 100 more") on 2026-10-11. Sublime's whole bet is on the
+*return* path — related ideas on every save, collections over tags, highlights
+as first-class cards, resurfacing. That is exactly the half of Good Content
+nobody uses yet. Deliberately **not** copied: cross-user discovery (needs a
+network), the infinite canvas, likes/follows, pricing tiers.
 
-**2. Topic normalization.** 78 enriched items produced **356 distinct topics**,
-only 39 shared by more than one item, and the vocabulary is bilingual
-("regulación" alongside "venture capital"). The filter chips run off that thin
-overlap and degrade as the library grows. Fix at the enrichment prompt (a
-controlled vocabulary) plus a clustering pass over what's stored.
+**0. Phone capture Shortcut (not code, ~5 min).** Zero capture tokens exist, so
+the iOS Shortcut was never set up — saving from the phone is more taps than it
+should be, and saves have dried up. Settings → create token → install Shortcut.
 
-**3. The 12 failed sources.** All paywall or bot-block failures — WSJ, NYT,
-Economist, Bloomberg, WaPo. Either recover them with browser-captured text via
-`scripts/reprocess-with-text.mjs`, or prune them so the library stops carrying
-dead weight.
+**1. "Connects to" — related items on every reader.** *(Building 2026-10-11.)*
+Each source's chunk embeddings are averaged into a centroid; the reader shows
+up to five other sources whose centroids are closest, with the passage in each
+that best matches. A similarity floor (0.45, calibrated against the real
+library: median pair 0.30, p90 0.49) keeps weak matches out — showing nothing
+beats showing noise. Because the reader refreshes itself while processing, a
+fresh save lands on its connections the moment it's ready.
 
-**4. Highlights.** Select text in the reader, store with offsets. Schema ready.
+**2. Resurfacing: shuffle + weekly "from your library".** A random-item button
+on the library page, and a weekly message with one older save, its brief, and
+its top two connections (reuses item 1). Delivery to Ross's Slack self-DM fits
+the existing daily-plan habit better than email; this replaces the old "digest
+email" item.
 
-**5. Projects.** Group sources; filter library, search, and Ask by project.
+**3. Collections instead of tags (replaces topic normalization + projects).**
+356 AI topics, only 39 shared — the chips never worked. Sublime reached the
+same conclusion ("AI tagging alone" isn't enough). Rename projects →
+collections in the UI (tables `projects`/`source_projects` already exist), let
+an item sit in many, filter library/search/Ask by collection. AI topics stay as
+a background signal for search and connections, not as filter chips.
 
-**6. PDF upload.** Private Supabase Storage bucket → same pipeline. The only
-phase-4 item that needs new infrastructure.
+**4. Notes and highlights as their own cards.** Both tables exist, both empty.
+A highlight or a standalone note becomes a card in the library that links back
+to its source and gets its own connections. Notes were Ross's original ask; this
+is the version of it that turns the archive into something written in. Index
+notes and `why_saved` in search so half-remembered context ("that thing I saved
+before the Palomma offer") finds things.
 
-**7. Digest email.** The plan defers this until a month of real saves — that
-milestone is close.
+**5. Good Content MCP server.** `search_library`, `ask_library`, `save_url` —
+authenticated with the same per-device tokens as `/api/capture`, every query
+scoped to the token's `user_id` (`AGENTS.md`). Makes the library usable from
+Claude Code and Pipo (WhatsApp → saved). Sublime gates this behind Premium.
+
+**6. Kindle / Readwise highlight import.** Fills item 4 with years of material
+on day one; the import Sublime leads with.
+
+**7. Leftovers from the old list.** The 15 failed sources (recover via
+`scripts/reprocess-with-text.mjs` or prune), PDF upload to a private Storage
+bucket.
 
 ---
 
@@ -103,6 +133,7 @@ milestone is close.
   redeploy.
 - **Paste the magic-link email template** into Supabase → Authentication →
   Emails → Magic Link. Source of truth: `supabase/email-templates/magic-link.html`.
+- **`YOUTUBE_API_KEY`** for video descriptions (then re-retry the video saves).
 
 ---
 
@@ -111,10 +142,11 @@ milestone is close.
 - `processing_error` surfaces raw API JSON for some failures rather than a
   human sentence.
 - The reading page shows the AI blurb; there is no way to write your own line
-  yet. Notes (item 1) is the natural home for that.
+  yet. Notes (item 4) is the natural home for that.
 - Enrichment quality on `gpt-5.6-luna` has been spot-checked, not swept across
-  the whole library. Re-enriching everything would cost a few dollars and give
-  a consistent baseline.
+  the whole library.
+- Multi-topic digests (Stratechery dailies) have generic centroids and show up
+  as connections more often than they deserve. Revisit if it gets noisy.
 
 ---
 

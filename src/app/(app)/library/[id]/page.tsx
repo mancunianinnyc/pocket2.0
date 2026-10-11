@@ -10,7 +10,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { ProcessingWatcher } from "@/components/processing-watcher";
+import { RelatedSources } from "@/components/related-sources";
 import { ShareOriginalButton } from "@/components/share-original";
 import { SourceActions } from "@/components/source-actions";
 import { SourceStatusBadge } from "@/components/source-status";
@@ -185,7 +187,9 @@ export default async function ReaderPage({
           ) : null}
         </article>
 
-        <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+        {/* Not sticky: with brief, connections, claims and topics the aside is
+            taller than the viewport, and a pinned aside hides its own bottom. */}
+        <aside className="space-y-4 lg:self-start">
           {metadata?.summary ? (
             <section className="hidden rounded-2xl border border-moss/12 bg-sage/55 p-5 lg:block">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
@@ -195,6 +199,12 @@ export default async function ReaderPage({
                 {brief(metadata.summary)}
               </p>
             </section>
+          ) : null}
+
+          {source.status === "ready" ? (
+            <Suspense fallback={null}>
+              <RelatedSources sourceId={source.id} />
+            </Suspense>
           ) : null}
 
           {metadata?.key_claims?.length ? (
